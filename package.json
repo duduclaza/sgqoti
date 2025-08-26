@@ -1,0 +1,13 @@
+{
+  "name": "sgqoti-hello-world",
+  "version": "1.0.0",
+  "description": "Simple Hello World project with CSS fingerprinting",
+  "main": "index.html",
+  "scripts": {
+    "cleanup": "node cleanup.js",
+    "build": "node cleanup.js && echo Build completed with cleanup"
+  },
+  "keywords": ["html", "css", "fingerprinting", "cache-busting"],
+  "author": "duduclaza",
+  "license": "MIT"
+}
