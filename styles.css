@@ -8,9 +8,7 @@ body {
   line-height: 1.5;
   display: grid;
   place-items: center;
-  background: radial-gradient(1200px 600px at 50% -10%, #89c2ff22 0, transparent 60%),
-              radial-gradient(1000px 500px at -10% 110%, #a7f3d022 0, transparent 60%),
-              radial-gradient(800px 400px at 110% 110%, #fde68a22 0, transparent 60%);
+  background: #2563eb;
 }
 
 .container {
