@@ -1,0 +1,294 @@
+/* Toner Grid Styles - SAP/TOTVS Corporate Style */
+.toner-grid-container {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--grid-header-bg);
+  border-bottom: 1px solid var(--card-border);
+  gap: 1rem;
+}
+
+.grid-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.grid-title h3 {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.grid-count {
+  background: var(--count-badge-bg);
+  color: var(--count-badge-text);
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.grid-search {
+  position: relative;
+  min-width: 280px;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 2.5rem 0.75rem 1rem;
+  border: 1px solid var(--input-border);
+  border-radius: 4px;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(0, 112, 243, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
+.grid-table-container {
+  overflow-x: auto;
+}
+
+.toner-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.toner-table th {
+  background: var(--table-header-bg);
+  color: var(--text-primary);
+  font-weight: 600;
+  padding: 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--table-border);
+  white-space: nowrap;
+}
+
+.toner-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+}
+
+.toner-table th.sortable:hover {
+  background: var(--table-header-hover);
+}
+
+.toner-table td {
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--table-border);
+  vertical-align: middle;
+}
+
+.toner-table tbody tr:hover {
+  background: var(--table-row-hover);
+}
+
+.modelo-cell strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.color-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  min-width: 60px;
+  text-align: center;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.type-original {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.type-compatible {
+  background: #e8f5e8;
+  color: #388e3c;
+}
+
+.type-remanufactured {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.actions-column {
+  width: 100px;
+  text-align: center;
+}
+
+.actions-cell {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-action {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.btn-edit {
+  background: var(--edit-btn-bg);
+  color: var(--edit-btn-color);
+}
+
+.btn-edit:hover {
+  background: var(--edit-btn-hover);
+  transform: scale(1.1);
+}
+
+.btn-delete {
+  background: var(--delete-btn-bg);
+  color: var(--delete-btn-color);
+}
+
+.btn-delete:hover {
+  background: var(--delete-btn-hover);
+  transform: scale(1.1);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-secondary);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.empty-state h4 {
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+/* Theme Variables for Grid */
+:root[data-theme="light"] {
+  --grid-header-bg: #f8f9fa;
+  --count-badge-bg: #e9ecef;
+  --count-badge-text: #495057;
+  --table-header-bg: #f8f9fa;
+  --table-header-hover: #e9ecef;
+  --table-border: #dee2e6;
+  --table-row-hover: #f8f9fa;
+  --edit-btn-bg: #e3f2fd;
+  --edit-btn-color: #1976d2;
+  --edit-btn-hover: #bbdefb;
+  --delete-btn-bg: #ffebee;
+  --delete-btn-color: #d32f2f;
+  --delete-btn-hover: #ffcdd2;
+}
+
+:root[data-theme="dark"] {
+  --grid-header-bg: #2a2a2a;
+  --count-badge-bg: #404040;
+  --count-badge-text: #cccccc;
+  --table-header-bg: #2a2a2a;
+  --table-header-hover: #333333;
+  --table-border: #404040;
+  --table-row-hover: #2a2a2a;
+  --edit-btn-bg: #1e3a5f;
+  --edit-btn-color: #64b5f6;
+  --edit-btn-hover: #2c5282;
+  --delete-btn-bg: #5c1e1e;
+  --delete-btn-color: #ef5350;
+  --delete-btn-hover: #7c2d2d;
+}
+
+/* Dark theme type badges */
+:root[data-theme="dark"] .type-original {
+  background: #1e3a5f;
+  color: #64b5f6;
+}
+
+:root[data-theme="dark"] .type-compatible {
+  background: #1e3a1e;
+  color: #81c784;
+}
+
+:root[data-theme="dark"] .type-remanufactured {
+  background: #3d2914;
+  color: #ffb74d;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .grid-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .grid-search {
+    min-width: auto;
+  }
+  
+  .toner-table {
+    font-size: 0.8rem;
+  }
+  
+  .toner-table th,
+  .toner-table td {
+    padding: 0.5rem;
+  }
+  
+  .actions-cell {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,270 @@
+/* Header Styles - SAP/TOTVS Style */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--header-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  z-index: 1001;
+  box-shadow: var(--header-shadow);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  min-width: 280px;
+}
+
+.company-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--primary-gradient);
+  color: white;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: -0.5px;
+}
+
+.company-info h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.company-info span {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
+.header-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.breadcrumb-item {
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.breadcrumb-item.active {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.breadcrumb-separator {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  background: var(--action-btn-bg);
+  border: 1px solid var(--action-btn-border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.action-btn:hover {
+  background: var(--action-btn-hover-bg);
+  border-color: var(--action-btn-hover-border);
+}
+
+.action-btn .badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #e53e3e;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.35rem;
+  border-radius: 10px;
+  min-width: 16px;
+  text-align: center;
+  line-height: 1;
+}
+
+.theme-toggle-btn {
+  width: 36px;
+  height: 36px;
+  background: var(--toggle-btn-bg);
+  border: 1px solid var(--toggle-btn-border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.theme-toggle-btn:hover {
+  background: var(--toggle-btn-hover-bg);
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--user-menu-bg);
+  border: 1px solid var(--user-menu-border);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 0.5rem;
+}
+
+.user-menu:hover {
+  background: var(--user-menu-hover-bg);
+  border-color: var(--user-menu-hover-border);
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  background: var(--avatar-bg);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.user-role {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+.dropdown-arrow {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-left: 0.25rem;
+}
+
+/* Theme Variables for Header */
+:root[data-theme="light"] {
+  --header-bg: #ffffff;
+  --header-border: #e2e8f0;
+  --header-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  --text-muted: #94a3b8;
+  
+  --action-btn-bg: #f8fafc;
+  --action-btn-border: #e2e8f0;
+  --action-btn-hover-bg: #f1f5f9;
+  --action-btn-hover-border: #cbd5e1;
+  
+  --toggle-btn-bg: #f8fafc;
+  --toggle-btn-border: #e2e8f0;
+  --toggle-btn-hover-bg: #f1f5f9;
+  
+  --user-menu-bg: #f8fafc;
+  --user-menu-border: #e2e8f0;
+  --user-menu-hover-bg: #f1f5f9;
+  --user-menu-hover-border: #cbd5e1;
+  --avatar-bg: #64748b;
+}
+
+:root[data-theme="dark"] {
+  --header-bg: #1e293b;
+  --header-border: #334155;
+  --header-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --primary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  --text-muted: #64748b;
+  
+  --action-btn-bg: #334155;
+  --action-btn-border: #475569;
+  --action-btn-hover-bg: #475569;
+  --action-btn-hover-border: #64748b;
+  
+  --toggle-btn-bg: #334155;
+  --toggle-btn-border: #475569;
+  --toggle-btn-hover-bg: #475569;
+  
+  --user-menu-bg: #334155;
+  --user-menu-border: #475569;
+  --user-menu-hover-bg: #475569;
+  --user-menu-hover-border: #64748b;
+  --avatar-bg: #64748b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header-center {
+    display: none;
+  }
+  
+  .company-info span {
+    display: none;
+  }
+  
+  .user-info {
+    display: none;
+  }
+  
+  .header-actions {
+    gap: 0.25rem;
+  }
+}
