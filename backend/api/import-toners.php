@@ -43,10 +43,11 @@ try {
     
     if ($fileExtension === 'csv') {
         $data = processCSV($file['tmp_name']);
+    } elseif ($fileExtension === 'xlsx') {
+        $data = processXLSX($file['tmp_name']);
     } else {
-        // Para XLS/XLSX seria necessário uma biblioteca como PhpSpreadsheet
-        // Por simplicidade, vamos focar no CSV por enquanto
-        throw new Exception('Formato XLS/XLSX não implementado ainda. Use CSV por favor.');
+        // Para XLS seria necessário uma biblioteca como PhpSpreadsheet
+        throw new Exception('Formato XLS não suportado. Use CSV ou XLSX por favor.');
     }
     
     if (empty($data)) {
@@ -193,6 +194,102 @@ function processCSV($filePath) {
             $rowIndex++;
         }
         fclose($handle);
+    }
+    
+    return $data;
+}
+
+function processXLSX($filePath) {
+    $data = [];
+    
+    // Ler arquivo XLSX como ZIP
+    $zip = new ZipArchive;
+    if ($zip->open($filePath) === TRUE) {
+        // Ler o arquivo de strings compartilhadas
+        $sharedStrings = [];
+        if (($sharedStringsXML = $zip->getFromName('xl/sharedStrings.xml')) !== false) {
+            $xml = simplexml_load_string($sharedStringsXML);
+            if ($xml) {
+                foreach ($xml->si as $si) {
+                    $sharedStrings[] = (string)$si->t;
+                }
+            }
+        }
+        
+        // Ler a planilha principal
+        $worksheetXML = $zip->getFromName('xl/worksheets/sheet1.xml');
+        if ($worksheetXML !== false) {
+            $xml = simplexml_load_string($worksheetXML);
+            if ($xml) {
+                $rows = [];
+                foreach ($xml->sheetData->row as $row) {
+                    $rowData = [];
+                    foreach ($row->c as $cell) {
+                        $value = '';
+                        if (isset($cell->v)) {
+                            $cellValue = (string)$cell->v;
+                            // Se é uma string compartilhada
+                            if (isset($cell['t']) && $cell['t'] == 's') {
+                                $value = isset($sharedStrings[$cellValue]) ? $sharedStrings[$cellValue] : '';
+                            } else {
+                                $value = $cellValue;
+                            }
+                        }
+                        $rowData[] = $value;
+                    }
+                    $rows[] = $rowData;
+                }
+                
+                // Processar dados similar ao CSV
+                $headers = [];
+                foreach ($rows as $index => $row) {
+                    if ($index === 0) {
+                        // Primeira linha são os cabeçalhos
+                        $headers = array_map('strtolower', $row);
+                        $headers = array_map('trim', $headers);
+                        
+                        // Mapear cabeçalhos
+                        $headerMap = [
+                            'modelo' => 'modelo',
+                            'cor' => 'cor',
+                            'tipo' => 'tipo',
+                            'capacidade' => 'capacidade',
+                            'peso cheio (g)' => 'peso_cheio',
+                            'peso cheio' => 'peso_cheio',
+                            'peso vazio (g)' => 'peso_vazio',
+                            'peso vazio' => 'peso_vazio',
+                            'preço (r$)' => 'preco',
+                            'preço' => 'preco',
+                            'preco' => 'preco'
+                        ];
+                        
+                        $mappedHeaders = [];
+                        foreach ($headers as $header) {
+                            $mappedHeaders[] = $headerMap[$header] ?? $header;
+                        }
+                        $headers = $mappedHeaders;
+                        
+                    } else {
+                        // Pular linhas de exemplo (cinza) e processar apenas dados reais
+                        if (count($row) >= 7 && !empty(trim($row[0]))) {
+                            $rowData = [];
+                            for ($i = 0; $i < count($headers) && $i < count($row); $i++) {
+                                $rowData[$headers[$i]] = trim($row[$i]);
+                            }
+                            
+                            // Pular linhas vazias e linhas de exemplo
+                            if (!empty(array_filter($rowData)) && 
+                                !in_array($rowData['modelo'] ?? '', ['HP CF280A', 'HP CE285A', 'Canon 728', 'HP CF541A'])) {
+                                $data[] = $rowData;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        $zip->close();
+    } else {
+        throw new Exception('Não foi possível abrir o arquivo XLSX');
     }
     
     return $data;

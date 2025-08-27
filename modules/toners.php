@@ -223,11 +223,11 @@
                             <div class="flex-1">
                                 <h4 class="text-sm font-semibold text-blue-900 mb-2">1. Baixar Planilha Exemplo</h4>
                                 <p class="text-sm text-blue-700 mb-3">
-                                    Baixe a planilha modelo com os campos corretos para preenchimento.
+                                    Baixe a planilha Excel formatada com colunas organizadas e exemplos para preenchimento.
                                 </p>
                                 <button onclick="downloadExampleSpreadsheet()" 
                                         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                    <i class="fas fa-file-excel mr-2"></i>Baixar Exemplo
+                                    <i class="fas fa-file-excel mr-2"></i>Baixar Planilha Excel
                                 </button>
                             </div>
                         </div>
@@ -613,26 +613,10 @@ function closeImportModal() {
 }
 
 function downloadExampleSpreadsheet() {
-    // Criar dados de exemplo
-    const exampleData = [
-        ['Modelo', 'Cor', 'Tipo', 'Capacidade', 'Peso Cheio (g)', 'Peso Vazio (g)', 'Preço (R$)'],
-        ['HP CF280A', 'Black', 'Original', '2700', '1200.5', '180.2', '89.90'],
-        ['HP CE285A', 'Black', 'Compativel', '1600', '950.0', '165.5', '45.50'],
-        ['Canon 728', 'Black', 'Remanufaturado', '2100', '1100.8', '175.3', '65.00'],
-        ['HP CF541A', 'Cyan', 'Original', '1300', '850.2', '150.1', '125.90']
-    ];
-    
-    // Converter para CSV
-    const csvContent = exampleData.map(row => 
-        row.map(cell => `"${cell}"`).join(',')
-    ).join('\n');
-    
-    // Criar e baixar arquivo
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    // Baixar planilha Excel formatada do backend
     const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', 'exemplo_toners.csv');
+    link.href = 'backend/api/download-example.php';
+    link.download = 'exemplo_toners.xlsx';
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
