@@ -5,7 +5,7 @@
  */
 
 class Database {
-    private $host = "srv2020.hstgr.io";
+    private $host = "localhost";
     private $db_name = 'u230868210_sgqoti';
     private $username = 'u230868210_dusouza';
     private $password = 'Pandora@1989';
