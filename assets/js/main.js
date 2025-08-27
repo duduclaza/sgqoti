@@ -384,7 +384,34 @@ class SGQApp {
                         
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
-                            <input type="password" id="db-password" value="Pandora@1989" class="form-input" readonly>
+                            <input type="password" id="db-password" value="***********" class="form-input" readonly>
+                        </div>
+                        
+                        <div class="flex gap-3 pt-4">
+                            <button type="button" id="edit-config-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                    Editar
+                                </span>
+                            </button>
+                            <button type="button" id="save-config-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors hidden">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    Salvar
+                                </span>
+                            </button>
+                            <button type="button" id="cancel-config-btn" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors hidden">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Cancelar
+                                </span>
+                            </button>
                         </div>
                         
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -499,6 +526,9 @@ class SGQApp {
         const testConnectionBtn = document.getElementById('test-connection-btn');
         const syncTablesBtn = document.getElementById('sync-tables-btn');
         const systemCheckBtn = document.getElementById('system-check-btn');
+        const editConfigBtn = document.getElementById('edit-config-btn');
+        const saveConfigBtn = document.getElementById('save-config-btn');
+        const cancelConfigBtn = document.getElementById('cancel-config-btn');
         
         if (testConnectionBtn) {
             testConnectionBtn.addEventListener('click', () => this.testConnection());
@@ -510,6 +540,18 @@ class SGQApp {
         
         if (systemCheckBtn) {
             systemCheckBtn.addEventListener('click', () => this.performSystemCheck());
+        }
+        
+        if (editConfigBtn) {
+            editConfigBtn.addEventListener('click', () => this.enableConfigEdit());
+        }
+        
+        if (saveConfigBtn) {
+            saveConfigBtn.addEventListener('click', () => this.saveConfig());
+        }
+        
+        if (cancelConfigBtn) {
+            cancelConfigBtn.addEventListener('click', () => this.cancelConfigEdit());
         }
     }
 
@@ -683,6 +725,125 @@ class SGQApp {
         
         logElement.appendChild(logEntry);
         logElement.scrollTop = logElement.scrollHeight;
+    }
+
+    // Métodos para edição de configurações
+    enableConfigEdit() {
+        const fields = ['db-host', 'db-port', 'db-name', 'db-user', 'db-password'];
+        const editBtn = document.getElementById('edit-config-btn');
+        const saveBtn = document.getElementById('save-config-btn');
+        const cancelBtn = document.getElementById('cancel-config-btn');
+        
+        // Salvar valores originais
+        this.originalConfig = {};
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                this.originalConfig[fieldId] = field.value;
+                field.removeAttribute('readonly');
+                field.classList.add('border-blue-300', 'focus:border-blue-500');
+                
+                // Mostrar senha real para edição
+                if (fieldId === 'db-password') {
+                    field.value = 'Pandor@1989'; // Valor real
+                }
+            }
+        });
+        
+        // Alternar botões
+        editBtn.classList.add('hidden');
+        saveBtn.classList.remove('hidden');
+        cancelBtn.classList.remove('hidden');
+        
+        this.addToLog('Modo de edição ativado', 'info');
+    }
+
+    cancelConfigEdit() {
+        const fields = ['db-host', 'db-port', 'db-name', 'db-user', 'db-password'];
+        const editBtn = document.getElementById('edit-config-btn');
+        const saveBtn = document.getElementById('save-config-btn');
+        const cancelBtn = document.getElementById('cancel-config-btn');
+        
+        // Restaurar valores originais
+        fields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field && this.originalConfig) {
+                field.value = this.originalConfig[fieldId];
+                field.setAttribute('readonly', true);
+                field.classList.remove('border-blue-300', 'focus:border-blue-500');
+                
+                // Mascarar senha novamente
+                if (fieldId === 'db-password') {
+                    field.value = '***********';
+                }
+            }
+        });
+        
+        // Alternar botões
+        editBtn.classList.remove('hidden');
+        saveBtn.classList.add('hidden');
+        cancelBtn.classList.add('hidden');
+        
+        this.addToLog('Edição cancelada', 'info');
+    }
+
+    async saveConfig() {
+        const configData = {
+            host: document.getElementById('db-host').value,
+            port: document.getElementById('db-port').value,
+            database: document.getElementById('db-name').value,
+            username: document.getElementById('db-user').value,
+            password: document.getElementById('db-password').value
+        };
+        
+        // Validar campos obrigatórios
+        if (!configData.host || !configData.database || !configData.username || !configData.password) {
+            this.addToLog('❌ Todos os campos são obrigatórios', 'error');
+            return;
+        }
+        
+        this.addToLog('Salvando configurações do banco de dados...', 'info');
+        
+        const button = document.getElementById('save-config-btn');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<div class="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div> Salvando...';
+        button.disabled = true;
+        
+        try {
+            const response = await fetch('backend/api/config/database-config.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    action: 'save_config',
+                    config: configData
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this.addToLog('✅ Configurações salvas com sucesso!', 'success');
+                
+                // Desabilitar modo de edição
+                this.cancelConfigEdit();
+                
+                // Testar nova conexão
+                setTimeout(() => {
+                    this.checkConnectionStatus();
+                }, 1000);
+                
+            } else {
+                this.addToLog('❌ Erro ao salvar: ' + result.message, 'error');
+            }
+            
+        } catch (error) {
+            this.addToLog('❌ Erro ao salvar configurações: ' + error.message, 'error');
+        } finally {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }
     }
 }
 
