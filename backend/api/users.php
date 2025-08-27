@@ -154,8 +154,27 @@ if ($method === 'POST') {
 
 function createUser($data) {
     try {
+        // Mapear campos do formulário para campos esperados
+        if (isset($data['nome']) && !isset($data['name'])) {
+            $data['name'] = $data['nome'];
+        }
+        if (isset($data['usuario']) && !isset($data['username'])) {
+            $data['username'] = $data['usuario'];
+        }
+        if (isset($data['senha']) && !isset($data['password'])) {
+            $data['password'] = $data['senha'];
+        }
+        
+        // Definir valores padrão se não fornecidos
+        if (!isset($data['role'])) {
+            $data['role'] = 'user';
+        }
+        if (!isset($data['status'])) {
+            $data['status'] = 'active';
+        }
+        
         // Validar dados obrigatórios
-        $requiredFields = ['name', 'email', 'username', 'password', 'role', 'status'];
+        $requiredFields = ['name', 'email', 'username', 'password'];
         foreach ($requiredFields as $field) {
             if (empty($data[$field])) {
                 Logger::log('createUser missing field', [ 'field' => $field ], 'WARN');

@@ -37,22 +37,27 @@ if ($_POST && isset($_POST['email']) && isset($_POST['senha'])) {
     
     if ($pdo) {
         try {
-            // Verificar credenciais no banco
-            $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ? LIMIT 1");
-            $stmt->execute([$email]);
+            // Buscar usuário por email ou username
+            $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ? OR usuario = ?");
+            $stmt->execute([$email, $email]);
             $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
             
-            error_log("Usuário encontrado: " . ($usuario ? 'SIM' : 'NÃO'));
+            // Debug: Log resultado da busca
+            error_log("Login attempt - Email/User: $email");
+            error_log("Usuário encontrado: " . ($usuario ? "SIM (ID: {$usuario['id']}, Nome: {$usuario['nome']})" : "NÃO"));
             
             if ($usuario) {
                 // Verificar senha
                 $senha_valida = password_verify($senha, $usuario['senha']);
-                error_log("Senha válida: " . ($senha_valida ? 'SIM' : 'NÃO'));
+                error_log("Verificação de senha: " . ($senha_valida ? "VÁLIDA" : "INVÁLIDA"));
                 
                 if ($senha_valida) {
+                    // Login bem-sucedido
                     $_SESSION['user_id'] = $usuario['id'];
                     $_SESSION['user_name'] = $usuario['nome'];
                     $_SESSION['user_email'] = $usuario['email'];
+                    
+                    error_log("Login bem-sucedido para usuário: " . $usuario['email']);
                     header('Location: index.php');
                     exit;
                 } else {
