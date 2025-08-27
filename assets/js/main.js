@@ -341,139 +341,189 @@ class SGQApp {
     getConfiguracoesContent() { 
         return `
             <div class="space-y-6">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="text-lg font-semibold text-gray-800">Configurações do Sistema</h3>
-                        <p class="text-sm text-gray-600">Configure conexão com banco de dados e inicialize o sistema</p>
-                    </div>
+                <!-- Abas de Navegação -->
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8">
+                        <button class="config-tab active border-b-2 border-blue-500 py-2 px-1 text-sm font-medium text-blue-600" data-tab="database">
+                            Banco de Dados
+                        </button>
+                        <button class="config-tab border-b-2 border-transparent py-2 px-1 text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="users">
+                            Cadastro de Usuários
+                        </button>
+                    </nav>
                 </div>
-                
-                <!-- Status da Conexão -->
-                <div id="connection-status" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <div class="flex items-center">
-                        <div class="w-3 h-3 bg-yellow-400 rounded-full mr-3 animate-pulse"></div>
-                        <span class="text-yellow-800 font-medium">Verificando conexão...</span>
+
+                <!-- Conteúdo da Aba Banco de Dados -->
+                <div id="database-tab" class="config-tab-content">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-800">Configurações do Banco de Dados</h3>
+                            <p class="text-sm text-gray-600">Teste conexão e sincronize tabelas do sistema</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Status da Conexão -->
+                    <div id="connection-status" class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                        <div class="flex items-center">
+                            <div class="w-3 h-3 bg-yellow-400 rounded-full mr-3 animate-pulse"></div>
+                            <span class="text-yellow-800 font-medium">Verificando conexão...</span>
+                        </div>
+                    </div>
+
+                    <!-- Ações do Sistema -->
+                    <div class="bg-white rounded-lg border border-gray-200 p-6">
+                        <h4 class="text-md font-semibold text-gray-800 mb-4">Ações do Sistema</h4>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <h5 class="font-medium text-gray-800">Testar Conexão</h5>
+                                    <p class="text-sm text-gray-600">Verificar se a conexão com o banco está funcionando</p>
+                                </div>
+                                <button id="test-connection-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        Testar
+                                    </span>
+                                </button>
+                            </div>
+                            
+                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                <div>
+                                    <h5 class="font-medium text-gray-800">Sincronizar Tabelas</h5>
+                                    <p class="text-sm text-gray-600">Criar/atualizar estrutura das tabelas no banco</p>
+                                </div>
+                                <button id="sync-tables-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                        </svg>
+                                        Sincronizar
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Log de Atividades -->
+                    <div class="bg-white rounded-lg border border-gray-200 p-6">
+                        <h4 class="text-md font-semibold text-gray-800 mb-4">Log de Atividades</h4>
+                        <div id="activity-log" class="bg-gray-50 rounded-lg p-4 h-32 overflow-y-auto text-sm font-mono">
+                            <div class="text-gray-600">Sistema iniciado. Aguardando comandos...</div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Configuração do Banco de Dados -->
-                <div class="bg-white rounded-lg border border-gray-200 p-6">
-                    <h4 class="text-md font-semibold text-gray-800 mb-4">Configuração do Banco de Dados</h4>
-                    
-                    <form id="db-config-form" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Host</label>
-                                <input type="text" id="db-host" value="212.85.3.19" class="form-input" readonly>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Porta</label>
-                                <input type="text" id="db-port" value="3306" class="form-input" readonly>
-                            </div>
-                        </div>
-                        
+                <!-- Conteúdo da Aba Cadastro de Usuários -->
+                <div id="users-tab" class="config-tab-content hidden">
+                    <div class="flex justify-between items-center mb-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Banco</label>
-                            <input type="text" id="db-name" value="u230868210_sgqoti" class="form-input" readonly>
+                            <h3 class="text-lg font-semibold text-gray-800">Cadastro de Usuários</h3>
+                            <p class="text-sm text-gray-600">Gerencie usuários do sistema SGQ OTI</p>
                         </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Usuário</label>
-                            <input type="text" id="db-user" value="u230868210_dusouza" class="form-input" readonly>
-                        </div>
-                        
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
-                            <input type="password" id="db-password" value="***********" class="form-input" readonly>
-                        </div>
-                        
-                        <div class="flex gap-3 pt-4">
-                            <button type="button" id="edit-config-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                                <span class="flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                    </svg>
-                                    Editar
-                                </span>
-                            </button>
-                            <button type="button" id="save-config-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors hidden">
-                                <span class="flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                    </svg>
-                                    Salvar
-                                </span>
-                            </button>
-                            <button type="button" id="cancel-config-btn" class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors hidden">
-                                <span class="flex items-center gap-2">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button id="add-user-btn" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                            <span class="flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                </svg>
+                                Novo Usuário
+                            </span>
+                        </button>
+                    </div>
+
+                    <!-- Modal de Cadastro de Usuário -->
+                    <div id="user-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+                        <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="text-lg font-semibold text-gray-800">Cadastro de Usuário</h4>
+                                <button id="close-modal-btn" class="text-gray-400 hover:text-gray-600">
+                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                     </svg>
-                                    Cancelar
-                                </span>
-                            </button>
-                        </div>
-                        
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <p class="text-blue-800 text-sm">
-                                <strong>Informação:</strong> As credenciais estão pré-configuradas para o ambiente de produção.
-                                Para alterar, edite o arquivo backend/config/database.php
-                            </p>
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Ações do Sistema -->
-                <div class="bg-white rounded-lg border border-gray-200 p-6">
-                    <h4 class="text-md font-semibold text-gray-800 mb-4">Ações do Sistema</h4>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <h5 class="font-medium text-gray-800">Testar Conexão</h5>
-                                <p class="text-sm text-gray-600">Verificar se a conexão com o banco está funcionando</p>
+                                </button>
                             </div>
-                            <button id="test-connection-btn" class="btn-secondary">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                Testar Conexão
-                            </button>
-                        </div>
-                        
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <h5 class="font-medium text-gray-800">Sincronizar Tabelas</h5>
-                                <p class="text-sm text-gray-600">Criar ou atualizar estrutura das tabelas no banco</p>
-                            </div>
-                            <button id="sync-tables-btn" class="btn-primary">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                </svg>
-                                Sincronizar
-                            </button>
-                        </div>
-                        
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                            <div>
-                                <h5 class="font-medium text-gray-800">Verificar Sistema</h5>
-                                <p class="text-sm text-gray-600">Executar diagnóstico completo do sistema</p>
-                            </div>
-                            <button id="system-check-btn" class="btn-secondary">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                                </svg>
-                                Verificar
-                            </button>
+                            
+                            <form id="user-registration-form" class="space-y-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Nome Completo</label>
+                                        <input type="text" id="user-name" class="form-input" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                                        <input type="email" id="user-email" class="form-input" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Usuário</label>
+                                        <input type="text" id="user-username" class="form-input" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label>
+                                        <input type="password" id="user-password" class="form-input" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Perfil</label>
+                                        <select id="user-role" class="form-input" required>
+                                            <option value="">Selecione um perfil</option>
+                                            <option value="admin">Administrador</option>
+                                            <option value="user">Usuário</option>
+                                            <option value="viewer">Visualizador</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                                        <select id="user-status" class="form-input" required>
+                                            <option value="active">Ativo</option>
+                                            <option value="inactive">Inativo</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex gap-3 pt-6 border-t">
+                                    <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                        Salvar Usuário
+                                    </button>
+                                    <button type="button" id="cancel-user-btn" class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                                        Cancelar
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                </div>
 
-                <!-- Log de Atividades -->
-                <div class="bg-white rounded-lg border border-gray-200 p-6">
-                    <h4 class="text-md font-semibold text-gray-800 mb-4">Log de Atividades</h4>
-                    <div id="activity-log" class="bg-gray-50 rounded-lg p-4 h-32 overflow-y-auto text-sm font-mono">
-                        <div class="text-gray-600">Sistema iniciado. Aguardando comandos...</div>
+                    <!-- Lista de Usuários -->
+                    <div class="bg-white rounded-lg border border-gray-200 p-6">
+                        <h4 class="text-md font-semibold text-gray-800 mb-4">Usuários Cadastrados</h4>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nome</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Perfil</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
+                                    <tr>
+                                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
+                                            Nenhum usuário cadastrado
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -522,13 +572,15 @@ class SGQApp {
         // Verificar conexão automaticamente ao carregar
         this.checkConnectionStatus();
         
-        // Event listeners para botões
+        // Event listeners para abas
+        const configTabs = document.querySelectorAll('.config-tab');
+        configTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => this.switchConfigTab(e.target.dataset.tab));
+        });
+        
+        // Event listeners para botões do banco de dados
         const testConnectionBtn = document.getElementById('test-connection-btn');
         const syncTablesBtn = document.getElementById('sync-tables-btn');
-        const systemCheckBtn = document.getElementById('system-check-btn');
-        const editConfigBtn = document.getElementById('edit-config-btn');
-        const saveConfigBtn = document.getElementById('save-config-btn');
-        const cancelConfigBtn = document.getElementById('cancel-config-btn');
         
         if (testConnectionBtn) {
             testConnectionBtn.addEventListener('click', () => this.testConnection());
@@ -538,21 +590,145 @@ class SGQApp {
             syncTablesBtn.addEventListener('click', () => this.syncTables());
         }
         
-        if (systemCheckBtn) {
-            systemCheckBtn.addEventListener('click', () => this.performSystemCheck());
+        // Event listeners para cadastro de usuários
+        const addUserBtn = document.getElementById('add-user-btn');
+        const cancelUserBtn = document.getElementById('cancel-user-btn');
+        const closeModalBtn = document.getElementById('close-modal-btn');
+        const userForm = document.getElementById('user-registration-form');
+        const userModal = document.getElementById('user-modal');
+        
+        if (addUserBtn) {
+            addUserBtn.addEventListener('click', () => this.showUserModal());
         }
         
-        if (editConfigBtn) {
-            editConfigBtn.addEventListener('click', () => this.enableConfigEdit());
+        if (cancelUserBtn) {
+            cancelUserBtn.addEventListener('click', () => this.hideUserModal());
         }
         
-        if (saveConfigBtn) {
-            saveConfigBtn.addEventListener('click', () => this.saveConfig());
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener('click', () => this.hideUserModal());
         }
         
-        if (cancelConfigBtn) {
-            cancelConfigBtn.addEventListener('click', () => this.cancelConfigEdit());
+        if (userModal) {
+            userModal.addEventListener('click', (e) => {
+                if (e.target === userModal) {
+                    this.hideUserModal();
+                }
+            });
         }
+        
+        if (userForm) {
+            userForm.addEventListener('submit', (e) => this.saveUser(e));
+        }
+    }
+
+    switchConfigTab(tabName) {
+        // Remover classe active de todas as abas
+        const tabs = document.querySelectorAll('.config-tab');
+        tabs.forEach(tab => {
+            tab.classList.remove('active', 'border-blue-500', 'text-blue-600');
+            tab.classList.add('border-transparent', 'text-gray-500');
+        });
+        
+        // Adicionar classe active na aba clicada
+        const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+        if (activeTab) {
+            activeTab.classList.add('active', 'border-blue-500', 'text-blue-600');
+            activeTab.classList.remove('border-transparent', 'text-gray-500');
+        }
+        
+        // Esconder todos os conteúdos
+        const contents = document.querySelectorAll('.config-tab-content');
+        contents.forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Mostrar conteúdo da aba ativa
+        const activeContent = document.getElementById(`${tabName}-tab`);
+        if (activeContent) {
+            activeContent.classList.remove('hidden');
+        }
+    }
+
+    showUserModal() {
+        const userModal = document.getElementById('user-modal');
+        if (userModal) {
+            userModal.classList.remove('hidden');
+            // Focar no primeiro campo
+            setTimeout(() => {
+                const firstInput = document.getElementById('user-name');
+                if (firstInput) {
+                    firstInput.focus();
+                }
+            }, 100);
+        }
+    }
+
+    hideUserModal() {
+        const userModal = document.getElementById('user-modal');
+        const form = document.getElementById('user-registration-form');
+        
+        if (userModal) {
+            userModal.classList.add('hidden');
+        }
+        
+        if (form) {
+            form.reset();
+        }
+    }
+
+    async saveUser(event) {
+        event.preventDefault();
+        
+        const formData = {
+            name: document.getElementById('user-name').value,
+            email: document.getElementById('user-email').value,
+            username: document.getElementById('user-username').value,
+            password: document.getElementById('user-password').value,
+            role: document.getElementById('user-role').value,
+            status: document.getElementById('user-status').value
+        };
+        
+        // Aqui você pode implementar a chamada para a API do backend
+        console.log('Dados do usuário:', formData);
+        
+        // Simular salvamento por enquanto
+        this.addUserToTable(formData);
+        this.hideUserModal();
+        this.showAlert('Usuário cadastrado com sucesso!', 'success');
+    }
+
+    addUserToTable(userData) {
+        const tableBody = document.getElementById('users-table-body');
+        if (!tableBody) return;
+        
+        // Remover mensagem de "nenhum usuário"
+        if (tableBody.children.length === 1 && tableBody.children[0].children.length === 1) {
+            tableBody.innerHTML = '';
+        }
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${userData.name}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${userData.email}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${userData.username}</td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full ${userData.role === 'admin' ? 'bg-red-100 text-red-800' : userData.role === 'user' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}">
+                    ${userData.role === 'admin' ? 'Administrador' : userData.role === 'user' ? 'Usuário' : 'Visualizador'}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 text-xs font-semibold rounded-full ${userData.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                    ${userData.status === 'active' ? 'Ativo' : 'Inativo'}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
+                <button class="text-red-600 hover:text-red-900">Excluir</button>
+            </td>
+        `;
+        
+        tableBody.appendChild(row);
     }
 
     async checkConnectionStatus() {
@@ -580,9 +756,40 @@ class SGQApp {
                     statusElement.className = 'bg-red-50 border border-red-200 rounded-lg p-4';
                 }
             }
+            
+            // Carregar configurações nos campos
+            this.loadConfigFromBackend();
+            
         } catch (error) {
             console.error('Erro ao verificar status da conexão:', error);
             this.addToLog('Erro ao verificar status da conexão: ' + error.message, 'error');
+        }
+    }
+
+    async loadConfigFromBackend() {
+        try {
+            const response = await fetch('backend/api/config/database-config.php');
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                const data = result.data;
+                
+                // Preencher campos com dados do backend
+                const hostField = document.getElementById('db-host');
+                const portField = document.getElementById('db-port');
+                const nameField = document.getElementById('db-name');
+                const userField = document.getElementById('db-user');
+                
+                if (hostField) hostField.value = data.host || '';
+                if (portField) portField.value = data.port || '';
+                if (nameField) nameField.value = data.database || '';
+                if (userField) userField.value = data.username || '';
+                
+                this.addToLog('✅ Configurações carregadas do backend', 'success');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar configurações:', error);
+            this.addToLog('❌ Erro ao carregar configurações: ' + error.message, 'error');
         }
     }
 

@@ -42,7 +42,7 @@ function handleGetConfig() {
             'success' => true,
             'message' => 'Configurações obtidas com sucesso',
             'data' => [
-                'host' => 'localhost',
+                'host' => 'srv2020.hstgr.io',
                 'port' => 3306,
                 'database' => 'u230868210_sgqoti',
                 'username' => 'u230868210_dusouza',
@@ -144,8 +144,8 @@ function syncDatabaseTables() {
             throw new Exception('Falha na conexão: ' . $connectionTest['message']);
         }
         
-        // Criar/atualizar tabelas
-        $tablesResult = $database->createTables();
+        // Sincronizar tabelas com análise
+        $tablesResult = $database->syncTables();
         
         if ($tablesResult['success']) {
             http_response_code(200);
@@ -155,11 +155,8 @@ function syncDatabaseTables() {
                 'data' => [
                     'connection' => $connectionTest,
                     'tables' => $tablesResult,
-                    'tables_created' => [
-                        'toners',
-                        'movimentacoes_estoque',
-                        'usuarios'
-                    ]
+                    'details' => $tablesResult['details'] ?? [],
+                    'changes_applied' => $tablesResult['changes_applied'] ?? 0
                 ],
                 'timestamp' => date('Y-m-d H:i:s')
             ]);

@@ -5,7 +5,7 @@
  */
 
 class Database {
-    private $host = "212.85.3.19";
+    private $host = "srv2020.hstgr.io";
     private $db_name = 'u230868210_sgqoti';
     private $username = 'u230868210_dusouza';
     private $password = 'Pandora@1989';
@@ -42,13 +42,13 @@ class Database {
     public function testConnection() {
         try {
             $conn = $this->getConnection();
-            $stmt = $conn->query("SELECT 1 as test, NOW() as current_time");
+            $stmt = $conn->query("SELECT 1 as test, NOW() as server_time");
             $result = $stmt->fetch();
             
             return [
                 'success' => true,
                 'message' => 'Conexão estabelecida com sucesso',
-                'server_time' => $result['current_time'],
+                'server_time' => $result['server_time'],
                 'database' => $this->db_name
             ];
         } catch(Exception $e) {
@@ -62,9 +62,77 @@ class Database {
     public function createTables() {
         try {
             $conn = $this->getConnection();
+            $results = [];
             
-            // Tabela de toners
-            $sql = "CREATE TABLE IF NOT EXISTS toners (
+            // Definir esquema das tabelas
+            $tables = $this->getTableSchema();
+            
+            foreach ($tables as $tableName => $tableSQL) {
+                try {
+                    $conn->exec($tableSQL);
+                    $results[] = "Tabela '$tableName' criada/atualizada com sucesso";
+                } catch(Exception $e) {
+                    $results[] = "Erro na tabela '$tableName': " . $e->getMessage();
+                }
+            }
+
+            return [
+                'success' => true,
+                'message' => 'Sincronização concluída',
+                'details' => $results
+            ];
+            
+        } catch(Exception $e) {
+            error_log("Error creating tables: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Erro ao sincronizar tabelas: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public function syncTables() {
+        try {
+            $conn = $this->getConnection();
+            $results = [];
+            
+            // Analisar tabelas existentes
+            $existingTables = $this->getExistingTables();
+            $schemaChanges = $this->analyzeSchemaChanges($existingTables);
+            
+            // Aplicar mudanças necessárias
+            foreach ($schemaChanges as $change) {
+                try {
+                    $conn->exec($change['sql']);
+                    $results[] = $change['description'];
+                } catch(Exception $e) {
+                    $results[] = "Erro: " . $change['description'] . " - " . $e->getMessage();
+                }
+            }
+
+            if (empty($results)) {
+                $results[] = "Banco de dados já está atualizado";
+            }
+
+            return [
+                'success' => true,
+                'message' => 'Análise e sincronização concluída',
+                'details' => $results,
+                'changes_applied' => count($schemaChanges)
+            ];
+            
+        } catch(Exception $e) {
+            error_log("Error syncing tables: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Erro ao analisar banco: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    private function getTableSchema() {
+        return [
+            'toners' => "CREATE TABLE IF NOT EXISTS toners (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 codigo VARCHAR(50) NOT NULL UNIQUE,
                 modelo VARCHAR(100) NOT NULL,
@@ -82,12 +150,9 @@ class Database {
                 INDEX idx_codigo (codigo),
                 INDEX idx_modelo (modelo),
                 INDEX idx_status (status)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
             
-            $conn->exec($sql);
-
-            // Tabela de movimentações de estoque
-            $sql = "CREATE TABLE IF NOT EXISTS movimentacoes_estoque (
+            'movimentacoes_estoque' => "CREATE TABLE IF NOT EXISTS movimentacoes_estoque (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 toner_id INT NOT NULL,
                 tipo_movimentacao ENUM('entrada', 'saida', 'ajuste') NOT NULL,
@@ -100,39 +165,95 @@ class Database {
                 FOREIGN KEY (toner_id) REFERENCES toners(id) ON DELETE CASCADE,
                 INDEX idx_toner_id (toner_id),
                 INDEX idx_data (data_movimentacao)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
             
-            $conn->exec($sql);
-
-            // Tabela de usuários (para futuro sistema de login)
-            $sql = "CREATE TABLE IF NOT EXISTS usuarios (
+            'usuarios' => "CREATE TABLE IF NOT EXISTS usuarios (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 nome VARCHAR(100) NOT NULL,
                 email VARCHAR(100) NOT NULL UNIQUE,
+                usuario VARCHAR(50) NOT NULL UNIQUE,
                 senha_hash VARCHAR(255) NOT NULL,
-                perfil ENUM('admin', 'usuario', 'visualizador') DEFAULT 'usuario',
-                status ENUM('ativo', 'inativo') DEFAULT 'ativo',
+                perfil ENUM('admin', 'user', 'viewer') DEFAULT 'user',
+                status ENUM('active', 'inactive') DEFAULT 'active',
                 ultimo_acesso TIMESTAMP NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 INDEX idx_email (email),
+                INDEX idx_usuario (usuario),
                 INDEX idx_status (status)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-            
-            $conn->exec($sql);
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+        ];
+    }
 
-            return [
-                'success' => true,
-                'message' => 'Tabelas criadas com sucesso'
-            ];
+    private function getExistingTables() {
+        try {
+            $conn = $this->getConnection();
+            $stmt = $conn->query("SHOW TABLES");
+            $tables = [];
             
+            while ($row = $stmt->fetch(PDO::FETCH_NUM)) {
+                $tableName = $row[0];
+                $tables[$tableName] = $this->getTableStructure($tableName);
+            }
+            
+            return $tables;
         } catch(Exception $e) {
-            error_log("Error creating tables: " . $e->getMessage());
-            return [
-                'success' => false,
-                'message' => 'Erro ao criar tabelas: ' . $e->getMessage()
-            ];
+            return [];
         }
+    }
+
+    private function getTableStructure($tableName) {
+        try {
+            $conn = $this->getConnection();
+            $stmt = $conn->query("DESCRIBE `$tableName`");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch(Exception $e) {
+            return [];
+        }
+    }
+
+    private function analyzeSchemaChanges($existingTables) {
+        $changes = [];
+        $expectedTables = $this->getTableSchema();
+        
+        foreach ($expectedTables as $tableName => $tableSQL) {
+            if (!isset($existingTables[$tableName])) {
+                $changes[] = [
+                    'sql' => $tableSQL,
+                    'description' => "Criando tabela '$tableName'"
+                ];
+            } else {
+                // Verificar se precisa de alterações na estrutura
+                $alterations = $this->checkTableAlterations($tableName, $existingTables[$tableName]);
+                $changes = array_merge($changes, $alterations);
+            }
+        }
+        
+        return $changes;
+    }
+
+    private function checkTableAlterations($tableName, $currentStructure) {
+        $changes = [];
+        
+        // Verificar se a tabela usuarios tem o campo 'usuario'
+        if ($tableName === 'usuarios') {
+            $hasUsuarioField = false;
+            foreach ($currentStructure as $column) {
+                if ($column['Field'] === 'usuario') {
+                    $hasUsuarioField = true;
+                    break;
+                }
+            }
+            
+            if (!$hasUsuarioField) {
+                $changes[] = [
+                    'sql' => "ALTER TABLE usuarios ADD COLUMN usuario VARCHAR(50) NOT NULL UNIQUE AFTER email, ADD INDEX idx_usuario (usuario)",
+                    'description' => "Adicionando campo 'usuario' na tabela usuarios"
+                ];
+            }
+        }
+        
+        return $changes;
     }
 }
 ?>
