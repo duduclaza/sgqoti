@@ -849,12 +849,34 @@ class SGQApp {
             
             if (result.success) {
                 this.addToLog('✅ Tabelas sincronizadas com sucesso!', 'success');
-                result.data.tables_created.forEach(table => {
-                    this.addToLog(`📋 Tabela criada/atualizada: ${table}`, 'info');
-                });
+                
+                // Verificar se há detalhes para mostrar
+                if (result.data && result.data.details && Array.isArray(result.data.details)) {
+                    result.data.details.forEach(detail => {
+                        this.addToLog(`📋 ${detail}`, 'info');
+                    });
+                } else if (result.details && Array.isArray(result.details)) {
+                    result.details.forEach(detail => {
+                        this.addToLog(`📋 ${detail}`, 'info');
+                    });
+                }
+                
+                // Mostrar número de mudanças aplicadas
+                const changesApplied = result.data?.changes_applied || result.changes_applied || 0;
+                if (changesApplied > 0) {
+                    this.addToLog(`🔧 ${changesApplied} alterações aplicadas`, 'success');
+                }
+                
                 this.checkConnectionStatus(); // Atualizar status visual
             } else {
                 this.addToLog('❌ Erro ao sincronizar tabelas: ' + result.message, 'error');
+                
+                // Mostrar detalhes do erro se disponível
+                if (result.details && Array.isArray(result.details)) {
+                    result.details.forEach(detail => {
+                        this.addToLog(`📋 ${detail}`, 'error');
+                    });
+                }
             }
             
         } catch (error) {
