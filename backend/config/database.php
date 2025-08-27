@@ -95,6 +95,14 @@ class Database {
         try {
             $conn = $this->getConnection();
             $results = [];
+            $successCount = 0;
+            $errorCount = 0;
+            
+            // Primeiro, criar tabelas básicas se não existirem
+            $basicResult = $this->createTables();
+            if (!$basicResult['success']) {
+                throw new Exception($basicResult['message']);
+            }
             
             // Analisar tabelas existentes
             $existingTables = $this->getExistingTables();
@@ -104,28 +112,33 @@ class Database {
             foreach ($schemaChanges as $change) {
                 try {
                     $conn->exec($change['sql']);
-                    $results[] = $change['description'];
+                    $results[] = "✅ " . $change['description'];
+                    $successCount++;
                 } catch(Exception $e) {
-                    $results[] = "Erro: " . $change['description'] . " - " . $e->getMessage();
+                    $results[] = "❌ Erro: " . $change['description'] . " - " . $e->getMessage();
+                    $errorCount++;
+                    error_log("SQL Error: " . $change['sql'] . " - " . $e->getMessage());
                 }
             }
 
-            if (empty($results)) {
-                $results[] = "Banco de dados já está atualizado";
+            if (empty($schemaChanges)) {
+                $results[] = "✅ Banco de dados já está atualizado";
             }
 
             return [
-                'success' => true,
-                'message' => 'Análise e sincronização concluída',
+                'success' => $errorCount === 0,
+                'message' => $errorCount === 0 ? 'Sincronização concluída com sucesso' : 'Sincronização concluída com alguns erros',
                 'details' => $results,
-                'changes_applied' => count($schemaChanges)
+                'changes_applied' => $successCount,
+                'errors' => $errorCount
             ];
             
         } catch(Exception $e) {
             error_log("Error syncing tables: " . $e->getMessage());
             return [
                 'success' => false,
-                'message' => 'Erro ao analisar banco: ' . $e->getMessage()
+                'message' => 'Erro ao analisar banco: ' . $e->getMessage(),
+                'details' => ["❌ " . $e->getMessage()]
             ];
         }
     }
@@ -247,8 +260,12 @@ class Database {
             
             if (!$hasUsuarioField) {
                 $changes[] = [
-                    'sql' => "ALTER TABLE usuarios ADD COLUMN usuario VARCHAR(50) NOT NULL UNIQUE AFTER email, ADD INDEX idx_usuario (usuario)",
+                    'sql' => "ALTER TABLE usuarios ADD COLUMN usuario VARCHAR(50) AFTER email",
                     'description' => "Adicionando campo 'usuario' na tabela usuarios"
+                ];
+                $changes[] = [
+                    'sql' => "ALTER TABLE usuarios ADD UNIQUE INDEX idx_usuario (usuario)",
+                    'description' => "Adicionando índice único para campo 'usuario'"
                 ];
             }
         }
