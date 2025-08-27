@@ -1,232 +1,724 @@
+<?php
+// SGQ OTI - Sistema de Gestão da Qualidade
+// Integração PHP + HTML com design moderno
+require_once 'backend/config/database.php';
+
+// Verificar se há sessão ativa
+session_start();
+
+// Conectar ao banco de dados
+try {
+    $database = new Database();
+    $pdo = $database->getConnection();
+} catch (Exception $e) {
+    error_log("Erro de conexão: " . $e->getMessage());
+}
+
+// Processar login se enviado
+if ($_POST && isset($_POST['email']) && isset($_POST['senha'])) {
+    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+    $senha = $_POST['senha'];
+    
+    // Verificar credenciais no banco
+    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ? LIMIT 1");
+    $stmt->execute([$email]);
+    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($usuario && password_verify($senha, $usuario['senha'])) {
+        $_SESSION['user_id'] = $usuario['id'];
+        $_SESSION['user_name'] = $usuario['nome'];
+        $_SESSION['user_email'] = $usuario['email'];
+        header('Location: index.php');
+        exit;
+    } else {
+        $erro_login = "Credenciais inválidas";
+    }
+}
+
+// Verificar se usuário está logado
+$usuario_logado = isset($_SESSION['user_id']);
+
+// Buscar dados para exibição
+$usuarios = [];
+if ($usuario_logado && $pdo) {
+    try {
+        $stmt = $pdo->query("SELECT id, nome, email, usuario, created_at FROM usuarios ORDER BY created_at DESC");
+        $usuarios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log("Erro ao buscar usuários: " . $e->getMessage());
+    }
+}
+
+// Determinar módulo atual
+$module = $_GET['module'] ?? 'dashboard';
+?>
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="transition-colors duration-300">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SGQ OTI - Sistema de Gestão da Qualidade</title>
-    <!-- Desabilitar cache completamente -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'inter': ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        primary: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            200: '#bae6fd',
-                            300: '#7dd3fc',
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            700: '#0369a1',
-                            800: '#075985',
-                            900: '#0c4a6e',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .theme-light { --bg: #f2f2f6; --bg-header: #ffffff; --bg-sidebar: #f9f9fb; --text: #1c1c1e; --input-bg: #ffffff; --input-border: #d1d1d6; --table-header: #e5e5ea; }
-        .theme-dark { --bg: #1f1f23; --bg-header: #2a2a2f; --bg-sidebar: #2a2a2f; --text: #e5e5e5; --input-bg: #2f2f35; --input-border: #444; --table-header: #3a3a3f; }
-        input, select, textarea { transition: all 0.3s ease; }
-        table th, table td { border-bottom: 1px solid var(--input-border); }
-        tr:hover { background-color: rgba(37,99,235,0.08); cursor: pointer; }
-        aside nav a { position: relative; transition: all 0.3s ease; }
-        aside nav a:hover { background-color: rgba(37,99,235,0.15); transform: translateX(4px); }
-    </style>
-    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
-    <script src="debug-logger.js?v=<?php echo time(); ?>"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGQ OTI - Sistema de Gestão da Qualidade</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* SAP-Inspired Design System */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body { 
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: #f7f7f7;
+      color: #32363a;
+      line-height: 1.5;
+    }
+    
+    /* Layout Structure */
+    .sap-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+    
+    /* Sidebar SAP Style */
+    .sap-sidebar {
+      width: 280px;
+      background: linear-gradient(180deg, #0070f2 0%, #0040a0 100%);
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      z-index: 1000;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+    }
+    
+    .sap-sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      text-align: center;
+    }
+    
+    .sap-sidebar-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .sap-sidebar-subtitle {
+      font-size: 12px;
+      opacity: 0.8;
+      font-weight: 400;
+    }
+    
+    .sap-nav {
+      padding: 16px 0;
+    }
+    
+    .sap-nav-item {
+      display: block;
+      padding: 12px 24px;
+      color: rgba(255,255,255,0.9);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border-left: 3px solid transparent;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .sap-nav-item:hover {
+      background-color: rgba(255,255,255,0.1);
+      color: white;
+      border-left-color: #00d4ff;
+    }
+    
+    .sap-nav-item.active {
+      background-color: rgba(255,255,255,0.15);
+      border-left-color: #00d4ff;
+      color: white;
+    }
+    
+    /* Main Content Area */
+    .sap-main {
+      flex: 1;
+      margin-left: 280px;
+      background-color: #f7f7f7;
+    }
+    
+    /* Header SAP Style */
+    .sap-header {
+      background: white;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 16px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .sap-header-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #32363a;
+    }
+    
+    .sap-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .sap-user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .sap-user-avatar {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #0070f2, #0040a0);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 14px;
+    }
+    
+    .sap-user-details {
+      text-align: right;
+    }
+    
+    .sap-user-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #32363a;
+    }
+    
+    .sap-logout {
+      font-size: 12px;
+      color: #0070f2;
+      text-decoration: none;
+    }
+    
+    .sap-logout:hover {
+      text-decoration: underline;
+    }
+    
+    /* Content Area */
+    .sap-content {
+      padding: 32px;
+    }
+    
+    /* Cards SAP Style */
+    .sap-card {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border: 1px solid #e5e5e5;
+      margin-bottom: 24px;
+    }
+    
+    .sap-card-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .sap-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #32363a;
+      margin: 0;
+    }
+    
+    .sap-card-content {
+      padding: 24px;
+    }
+    
+    /* Forms SAP Style */
+    .sap-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    .sap-form-group {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sap-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: #32363a;
+      margin-bottom: 6px;
+    }
+    
+    .sap-input {
+      padding: 12px 16px;
+      border: 1px solid #d9d9d9;
+      border-radius: 4px;
+      font-size: 14px;
+      background: white;
+      transition: all 0.2s ease;
+    }
+    
+    .sap-input:focus {
+      outline: none;
+      border-color: #0070f2;
+      box-shadow: 0 0 0 2px rgba(0,112,242,0.1);
+    }
+    
+    .sap-button {
+      padding: 12px 24px;
+      background: #0070f2;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .sap-button:hover {
+      background: #0040a0;
+    }
+    
+    .sap-button-secondary {
+      background: #f0f0f0;
+      color: #32363a;
+    }
+    
+    .sap-button-secondary:hover {
+      background: #e0e0e0;
+    }
+    
+    .sap-button-danger {
+      background: #d32f2f;
+    }
+    
+    .sap-button-danger:hover {
+      background: #b71c1c;
+    }
+    
+    .sap-button-warning {
+      background: #ff9800;
+    }
+    
+    .sap-button-warning:hover {
+      background: #f57c00;
+    }
+    
+    /* Tables SAP Style */
+    .sap-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+    
+    .sap-table th {
+      background: #f8f9fa;
+      padding: 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #32363a;
+      border-bottom: 2px solid #e5e5e5;
+      font-size: 14px;
+    }
+    
+    .sap-table td {
+      padding: 16px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+      color: #32363a;
+    }
+    
+    .sap-table tr:hover {
+      background-color: #f8f9fa;
+    }
+    
+    /* Dashboard Cards */
+    .sap-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+    
+    .sap-stat-card {
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-left: 4px solid #0070f2;
+    }
+    
+    .sap-stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0070f2;
+      margin-bottom: 8px;
+    }
+    
+    .sap-stat-label {
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+    
+    /* Login Page SAP Style */
+    .sap-login-container {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0070f2 0%, #0040a0 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .sap-login-card {
+      background: white;
+      padding: 48px;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    .sap-login-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #32363a;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    
+    .sap-login-subtitle {
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    
+    .sap-login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .sap-alert {
+      padding: 12px 16px;
+      border-radius: 4px;
+      font-size: 14px;
+      margin-bottom: 20px;
+    }
+    
+    .sap-alert-error {
+      background: #ffebee;
+      color: #c62828;
+      border: 1px solid #ffcdd2;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sap-sidebar {
+        width: 100%;
+        transform: translateX(-100%);
+      }
+      
+      .sap-main {
+        margin-left: 0;
+      }
+      
+      .sap-content {
+        padding: 16px;
+      }
+      
+      .sap-form {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
-<body class="theme-light font-inter transition-colors duration-300" style="background-color: var(--bg); color: var(--text)">
-    <!-- Container Principal -->
-    <div class="flex min-h-screen">
-        <!-- Menu Lateral Fixo -->
-        <aside id="sidebar" class="fixed left-0 top-0 z-40 w-64 h-screen shadow-xl border-r flex flex-col transition-colors duration-300" style="background-color: var(--bg-sidebar); border-color: var(--input-border)">
-            <!-- Header do Menu -->
-            <div class="flex items-center justify-center h-20 border-b bg-gradient-to-r from-blue-600 to-purple-600" style="border-color: var(--input-border)">
-                <div class="text-center">
-                    <h1 class="text-xl font-bold text-white">SGQ OTI</h1>
-                    <p class="text-sm text-blue-100">Sistema de Gestão da Qualidade</p>
-                </div>
-            </div>
+<body>
 
-            <!-- Navegação -->
-            <nav class="mt-6 px-3 flex-1 overflow-y-auto scrollbar-hidden">
-                <ul class="space-y-1 pb-20">
-                    <li>
-                        <a href="#" class="sidebar-link active" data-module="toners">
-                            <div class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center mr-3 transition-colors duration-200">
-                                    <svg class="w-4 h-4 transition-colors duration-200" style="color: var(--text)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                                    </svg>
-                                </div>
-                                <span class="font-medium text-sm">Controle de Toners</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="sidebar-link" data-module="homologacoes">
-                            <div class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center mr-3 transition-colors duration-200">
-                                    <svg class="w-4 h-4 transition-colors duration-200" style="color: var(--text)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                    </svg>
-                                </div>
-                                <span class="font-medium text-sm">Homologações</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="sidebar-link" data-module="amostragens">
-                            <div class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center mr-3 transition-colors duration-200">
-                                    <svg class="w-4 h-4 transition-colors duration-200" style="color: var(--text)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
-                                    </svg>
-                                </div>
-                                <span class="font-medium text-sm">Amostragens</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="sidebar-link" data-module="garantias">
-                            <div class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center mr-3 transition-colors duration-200">
-                                    <svg class="w-4 h-4 transition-colors duration-200" style="color: var(--text)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                    </svg>
-                                </div>
-                                <span class="font-medium text-sm">Garantias</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="sidebar-link" data-module="pops-its">
-                            <div class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center mr-3 transition-colors duration-200">
-                                    <svg class="w-4 h-4 transition-colors duration-200" style="color: var(--text)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
-                                    </svg>
-                                </div>
-                                <span class="font-medium text-sm">POPs e ITs</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="sidebar-link" data-module="fluxogramas">
-                            <div class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center mr-3 transition-colors duration-200">
-                                    <svg class="w-4 h-4 transition-colors duration-200" style="color: var(--text)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path>
-                                    </svg>
-                                </div>
-                                <span class="font-medium text-sm">Fluxogramas</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="sidebar-link" data-module="auditorias">
-                            <div class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center mr-3 transition-colors duration-200">
-                                    <svg class="w-4 h-4 transition-colors duration-200" style="color: var(--text)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                </div>
-                                <span class="font-medium text-sm">Auditorias</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="sidebar-link" data-module="dinamicas">
-                            <div class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center mr-3 transition-colors duration-200">
-                                    <svg class="w-4 h-4 transition-colors duration-200" style="color: var(--text)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                    </svg>
-                                </div>
-                                <span class="font-medium text-sm">Dinâmicas</span>
-                            </div>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="sidebar-link" data-module="configuracoes">
-                            <div class="flex items-center px-4 py-3 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 group">
-                                <div class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 flex items-center justify-center mr-3 transition-colors duration-200">
-                                    <svg class="w-4 h-4 transition-colors duration-200" style="color: var(--text)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                </div>
-                                <span class="font-medium text-sm">Configurações</span>
-                            </div>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-
-            <!-- Footer do Menu -->
-            <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-                <div class="text-center text-sm text-gray-500 dark:text-gray-400">
-                    <p>&copy; 2025 SGQ OTI</p>
-                    <p>Versão 1.0.0</p>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Área de Conteúdo Principal -->
-        <main class="flex-1 ml-64">
-            <!-- Header Superior -->
-            <header class="shadow-sm border-b h-20 flex items-center justify-between px-8 transition-colors duration-300" style="background-color: var(--bg-header); border-color: var(--input-border); color: var(--text)">
-                <div>
-                    <h2 id="page-title" class="text-2xl font-bold" style="color: var(--text)">Controle de Toners</h2>
-                    <p id="page-subtitle" class="text-sm opacity-70" style="color: var(--text)">Gerencie o cadastro de toners e cartuchos</p>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <!-- Theme Toggle -->
-                    <button id="theme-toggle" class="px-4 py-2 rounded-lg transition-all duration-300 flex items-center gap-2 shadow-sm" style="background-color: var(--table-header); color: var(--text); border: 1px solid var(--input-border)" title="Alternar tema">
-                        <span id="theme-toggle-icon" aria-hidden="true">🌙</span>
-                        <span id="theme-toggle-text" class="text-sm font-medium">Modo escuro</span>
-                    </button>
-                    <div class="text-right">
-                        <p class="text-sm font-medium" style="color: var(--text)">Usuário Logado</p>
-                        <p class="text-xs opacity-70" style="color: var(--text)" id="current-date"></p>
-                    </div>
-                    <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                        <span class="text-white font-semibold">U</span>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Conteúdo da Página -->
-            <div class="p-8">
-                <div id="content-area" class="rounded-xl shadow-sm border p-6 transition-colors duration-300" style="background-color: var(--bg-header); border-color: var(--input-border); color: var(--text)">
-                    <!-- Conteúdo será carregado dinamicamente aqui -->
-                    <div class="text-center py-16">
-                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold mb-2" style="color: var(--text)">Controle de Toners</h3>
-                        <p class="opacity-70" style="color: var(--text)">Selecione uma opção no menu lateral para começar</p>
-                    </div>
-                </div>
-            </div>
-        </main>
+  <?php if (!$usuario_logado): ?>
+  <!-- LOGIN PAGE SAP STYLE -->
+  <div class="sap-login-container">
+    <div class="sap-login-card">
+      <h1 class="sap-login-title">SGQ OTI</h1>
+      <p class="sap-login-subtitle">Sistema de Gestão da Qualidade</p>
+      
+      <?php if (isset($erro_login)): ?>
+        <div class="sap-alert sap-alert-error">
+          <?= htmlspecialchars($erro_login) ?>
+        </div>
+      <?php endif; ?>
+      
+      <form method="POST" class="sap-login-form">
+        <div class="sap-form-group">
+          <label class="sap-label">E-mail</label>
+          <input type="email" name="email" class="sap-input" required>
+        </div>
+        <div class="sap-form-group">
+          <label class="sap-label">Senha</label>
+          <input type="password" name="senha" class="sap-input" required>
+        </div>
+        <button type="submit" class="sap-button">Entrar no Sistema</button>
+      </form>
     </div>
+  </div>
+  <?php else: ?>
 
-    <script src="assets/js/main.js?v=<?php echo time(); ?>"></script>
+  <!-- SAP LAYOUT -->
+  <div class="sap-layout">
+    <!-- SIDEBAR SAP STYLE -->
+    <aside class="sap-sidebar">
+      <div class="sap-sidebar-header">
+        <h1 class="sap-sidebar-title">SGQ OTI</h1>
+        <p class="sap-sidebar-subtitle">Sistema de Gestão da Qualidade</p>
+      </div>
+      
+      <nav class="sap-nav">
+        <a href="?module=dashboard" class="sap-nav-item <?= $module == 'dashboard' ? 'active' : '' ?>">📊 Dashboard</a>
+        <a href="?module=usuarios" class="sap-nav-item <?= $module == 'usuarios' ? 'active' : '' ?>">👥 Usuários</a>
+        <a href="?module=toners" class="sap-nav-item <?= $module == 'toners' ? 'active' : '' ?>">🖨️ Controle de Toners</a>
+        <a href="?module=homologacoes" class="sap-nav-item <?= $module == 'homologacoes' ? 'active' : '' ?>">✅ Homologações</a>
+        <a href="?module=amostragens" class="sap-nav-item <?= $module == 'amostragens' ? 'active' : '' ?>">🧪 Amostragens</a>
+        <a href="?module=garantias" class="sap-nav-item <?= $module == 'garantias' ? 'active' : '' ?>">🛡️ Garantias</a>
+        <a href="?module=pops-its" class="sap-nav-item <?= $module == 'pops-its' ? 'active' : '' ?>">📋 POPs e ITs</a>
+        <a href="?module=fluxogramas" class="sap-nav-item <?= $module == 'fluxogramas' ? 'active' : '' ?>">📊 Fluxogramas</a>
+        <a href="?module=auditorias" class="sap-nav-item <?= $module == 'auditorias' ? 'active' : '' ?>">🔍 Auditorias</a>
+        <a href="?module=dinamicas" class="sap-nav-item <?= $module == 'dinamicas' ? 'active' : '' ?>">⚡ Dinâmicas</a>
+        <a href="?module=configuracoes" class="sap-nav-item <?= $module == 'configuracoes' ? 'active' : '' ?>">⚙️ Configurações</a>
+      </nav>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="sap-main">
+      <!-- HEADER SAP STYLE -->
+      <header class="sap-header">
+        <h1 class="sap-header-title">
+          <?php
+          $titles = [
+            'dashboard' => 'Dashboard',
+            'usuarios' => 'Gestão de Usuários',
+            'toners' => 'Controle de Toners',
+            'homologacoes' => 'Homologações',
+            'amostragens' => 'Amostragens',
+            'garantias' => 'Garantias',
+            'pops-its' => 'POPs e ITs',
+            'fluxogramas' => 'Fluxogramas',
+            'auditorias' => 'Auditorias',
+            'dinamicas' => 'Dinâmicas',
+            'configuracoes' => 'Configurações'
+          ];
+          echo $titles[$module] ?? 'SGQ OTI';
+          ?>
+        </h1>
+        
+        <div class="sap-header-actions">
+          <div class="sap-user-info">
+            <div class="sap-user-details">
+              <div class="sap-user-name"><?= htmlspecialchars($_SESSION['user_name']) ?></div>
+              <a href="logout.php" class="sap-logout">Sair do Sistema</a>
+            </div>
+            <div class="sap-user-avatar">
+              <?= strtoupper(substr($_SESSION['user_name'], 0, 1)) ?>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT AREA -->
+      <div class="sap-content">
+      
+        <?php if ($module == 'usuarios'): ?>
+        <!-- FORMULÁRIO DE USUÁRIOS SAP STYLE -->
+        <div class="sap-card">
+          <div class="sap-card-header">
+            <h2 class="sap-card-title">Cadastro de Novo Usuário</h2>
+          </div>
+          <div class="sap-card-content">
+            <form method="POST" action="backend/api/users.php" class="sap-form">
+              <input type="hidden" name="action" value="create_user">
+              <div class="sap-form-group">
+                <label class="sap-label">Nome Completo</label>
+                <input type="text" name="nome" class="sap-input" required>
+              </div>
+              <div class="sap-form-group">
+                <label class="sap-label">E-mail</label>
+                <input type="email" name="email" class="sap-input" required>
+              </div>
+              <div class="sap-form-group">
+                <label class="sap-label">Nome de Usuário</label>
+                <input type="text" name="usuario" class="sap-input" required>
+              </div>
+              <div class="sap-form-group">
+                <label class="sap-label">Senha</label>
+                <input type="password" name="senha" class="sap-input" required>
+              </div>
+              <div class="sap-form-group" style="grid-column: 1 / -1;">
+                <button type="submit" class="sap-button">Cadastrar Usuário</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- TABELA DE USUÁRIOS SAP STYLE -->
+        <div class="sap-card">
+          <div class="sap-card-header">
+            <h2 class="sap-card-title">Usuários Cadastrados (<?= count($usuarios) ?>)</h2>
+          </div>
+          <div class="sap-card-content">
+            <div style="overflow-x: auto;">
+              <table class="sap-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>E-mail</th>
+                    <th>Usuário</th>
+                    <th>Data Cadastro</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php foreach($usuarios as $u): ?>
+                  <tr>
+                    <td><?= htmlspecialchars($u['nome']) ?></td>
+                    <td><?= htmlspecialchars($u['email']) ?></td>
+                    <td><?= htmlspecialchars($u['usuario']) ?></td>
+                    <td><?= date('d/m/Y H:i', strtotime($u['created_at'])) ?></td>
+                    <td>
+                      <button class="sap-button sap-button-warning" style="margin-right: 8px; padding: 6px 12px; font-size: 12px;">Editar</button>
+                      <button class="sap-button sap-button-danger" style="padding: 6px 12px; font-size: 12px;">Excluir</button>
+                    </td>
+                  </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <?php elseif ($module == 'dashboard'): ?>
+        <!-- DASHBOARD SAP STYLE -->
+        <div class="sap-stats-grid">
+          <div class="sap-stat-card">
+            <div class="sap-stat-number"><?= count($usuarios) ?></div>
+            <div class="sap-stat-label">Usuários Cadastrados</div>
+          </div>
+          <div class="sap-stat-card">
+            <div class="sap-stat-number">11</div>
+            <div class="sap-stat-label">Módulos Disponíveis</div>
+          </div>
+          <div class="sap-stat-card">
+            <div class="sap-stat-number">100%</div>
+            <div class="sap-stat-label">Sistema Online</div>
+          </div>
+        </div>
+        
+        <div class="sap-card">
+          <div class="sap-card-header">
+            <h2 class="sap-card-title">Atividade do Sistema</h2>
+          </div>
+          <div class="sap-card-content">
+            <canvas id="dashboardChart" style="max-height: 400px;"></canvas>
+          </div>
+        </div>
+
+        <?php else: ?>
+        <!-- MÓDULO GENÉRICO SAP STYLE -->
+        <div class="sap-card">
+          <div class="sap-card-header">
+            <h2 class="sap-card-title">Módulo: <?= ucfirst(str_replace('-', ' ', $module)) ?></h2>
+          </div>
+          <div class="sap-card-content">
+            <div style="text-align: center; padding: 64px 32px;">
+              <div style="width: 64px; height: 64px; background: #f0f0f0; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 24px;">🚧</div>
+              <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 12px; color: #32363a;">Em Desenvolvimento</h3>
+              <p style="color: #666; font-size: 14px;">Este módulo está sendo desenvolvido e estará disponível em breve.</p>
+            </div>
+          </div>
+        </div>
+        <?php endif; ?>
+
+    </main>
+  </div>
+
+  <script>
+    // Gráfico do Dashboard SAP Style
+    <?php if ($module == 'dashboard'): ?>
+    const ctx = document.getElementById('dashboardChart');
+    if (ctx) {
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho'],
+          datasets: [{
+            label: 'Usuários Ativos',
+            data: [<?= count($usuarios) ?>, <?= count($usuarios) + 2 ?>, <?= count($usuarios) + 1 ?>, <?= count($usuarios) + 3 ?>, <?= count($usuarios) + 2 ?>, <?= count($usuarios) + 4 ?>],
+            borderColor: '#0070f2',
+            backgroundColor: 'rgba(0,112,242,0.1)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { 
+            legend: { 
+              display: true,
+              position: 'top',
+              labels: {
+                font: {
+                  family: 'Inter',
+                  size: 12
+                }
+              }
+            }
+          },
+          scales: { 
+            y: { 
+              beginAtZero: true,
+              grid: {
+                color: '#f0f0f0'
+              },
+              ticks: {
+                font: {
+                  family: 'Inter',
+                  size: 11
+                }
+              }
+            },
+            x: {
+              grid: {
+                color: '#f0f0f0'
+              },
+              ticks: {
+                font: {
+                  family: 'Inter',
+                  size: 11
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    <?php endif; ?>
+  </script>
+
+  <?php endif; ?>
 </body>
 </html>
