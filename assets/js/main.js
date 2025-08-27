@@ -101,9 +101,21 @@ class SGQApp {
     applyTheme(theme) {
         this.theme = theme;
         const isDark = theme === 'dark';
-        document.documentElement.classList.toggle('dark', isDark);
+        const body = document.body;
+        
+        // Remove classes antigas
+        body.classList.remove('theme-light', 'theme-dark');
+        
+        // Aplica nova classe
+        if (isDark) {
+            body.classList.add('theme-dark');
+        } else {
+            body.classList.add('theme-light');
+        }
+        
         // Persist
         try { localStorage.setItem('theme', theme); } catch (_) {}
+        
         // Atualiza rótulo do botão
         const iconEl = document.getElementById('theme-toggle-icon');
         const textEl = document.getElementById('theme-toggle-text');
