@@ -10,6 +10,19 @@ session_start();
 try {
     $database = new Database();
     $pdo = $database->getConnection();
+    
+    // Criar usuário master se não existir
+    $stmt_check = $pdo->prepare("SELECT * FROM usuarios WHERE email = ? OR usuario = ?");
+    $stmt_check->execute(['admin@sgqoti.com', 'admin']);
+    $master_exists = $stmt_check->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$master_exists) {
+        $senha_hash = password_hash('Admin@123', PASSWORD_DEFAULT);
+        $stmt_create = $pdo->prepare("INSERT INTO usuarios (nome, email, usuario, senha, created_at) VALUES (?, ?, ?, ?, NOW())");
+        $stmt_create->execute(['Administrador Master', 'admin@sgqoti.com', 'admin', $senha_hash]);
+        error_log("Usuário master criado automaticamente");
+    }
+    
 } catch (Exception $e) {
     error_log("Erro de conexão: " . $e->getMessage());
 }
@@ -19,19 +32,42 @@ if ($_POST && isset($_POST['email']) && isset($_POST['senha'])) {
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $senha = $_POST['senha'];
     
-    // Verificar credenciais no banco
-    $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ? LIMIT 1");
-    $stmt->execute([$email]);
-    $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Debug: Log tentativa de login
+    error_log("Tentativa de login: " . $email);
     
-    if ($usuario && password_verify($senha, $usuario['senha'])) {
-        $_SESSION['user_id'] = $usuario['id'];
-        $_SESSION['user_name'] = $usuario['nome'];
-        $_SESSION['user_email'] = $usuario['email'];
-        header('Location: index.php');
-        exit;
+    if ($pdo) {
+        try {
+            // Verificar credenciais no banco
+            $stmt = $pdo->prepare("SELECT * FROM usuarios WHERE email = ? LIMIT 1");
+            $stmt->execute([$email]);
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            error_log("Usuário encontrado: " . ($usuario ? 'SIM' : 'NÃO'));
+            
+            if ($usuario) {
+                // Verificar senha
+                $senha_valida = password_verify($senha, $usuario['senha']);
+                error_log("Senha válida: " . ($senha_valida ? 'SIM' : 'NÃO'));
+                
+                if ($senha_valida) {
+                    $_SESSION['user_id'] = $usuario['id'];
+                    $_SESSION['user_name'] = $usuario['nome'];
+                    $_SESSION['user_email'] = $usuario['email'];
+                    header('Location: index.php');
+                    exit;
+                } else {
+                    $erro_login = "Senha incorreta";
+                }
+            } else {
+                $erro_login = "Usuário não encontrado";
+            }
+        } catch (Exception $e) {
+            error_log("Erro no login: " . $e->getMessage());
+            $erro_login = "Erro interno do sistema";
+        }
     } else {
-        $erro_login = "Credenciais inválidas";
+        error_log("Erro: Conexão com banco não disponível");
+        $erro_login = "Erro de conexão com banco de dados";
     }
 }
 
