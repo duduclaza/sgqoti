@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SGQ OTI - Sistema de Gestão da Qualidade</title>
+    <!-- Desabilitar cache completamente -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -32,8 +36,8 @@
             }
         }
     </script>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <script src="debug-logger.js"></script>
+    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo time(); ?>">
+    <script src="debug-logger.js?v=<?php echo time(); ?>"></script>
 </head>
 <body class="bg-gray-50 font-sans">
     <!-- Container Principal -->
@@ -214,6 +218,6 @@
         </main>
     </div>
 
-    <script src="assets/js/main.js"></script>
+    <script src="assets/js/main.js?v=<?php echo time(); ?>"></script>
 </body>
 </html>
