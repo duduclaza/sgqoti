@@ -702,7 +702,7 @@ class SGQApp {
         console.log('Dados enviados:', formData);
         this.addToLog('🔄 Enviando dados: ' + JSON.stringify(formData), 'info');
         
-        const apiUrl = 'backend/api/users.php';
+        const apiUrl = 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
             
         console.log('URL da API:', apiUrl);
         console.log('Hostname detectado:', window.location.hostname);
@@ -793,7 +793,7 @@ class SGQApp {
 
     async loadExistingUsers() {
         try {
-            const apiUrl = 'backend/api/users.php';
+            const apiUrl = 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
                 
             const response = await fetch(apiUrl, {
                 method: 'GET'
