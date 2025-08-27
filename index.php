@@ -123,62 +123,118 @@ $module = $_GET['module'] ?? 'dashboard';
       min-height: 100vh;
     }
     
-    /* Sidebar SAP Style */
+    /* Sidebar SAP Style - Dark Theme */
     .sap-sidebar {
-      width: 280px;
-      background: linear-gradient(180deg, #0070f2 0%, #0040a0 100%);
-      color: white;
       position: fixed;
-      top: 0;
       left: 0;
+      top: 0;
+      width: 280px;
       height: 100vh;
+      background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+      border-right: 1px solid #404040;
+      padding: 0;
       z-index: 1000;
-      box-shadow: 2px 0 8px rgba(0,0,0,0.1);
+      overflow-y: auto;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.3);
     }
     
     .sap-sidebar-header {
       padding: 24px 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.2);
+      background: linear-gradient(135deg, #0070f2 0%, #0040a0 100%);
+      color: white;
+      border-bottom: 1px solid #005bb5;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       text-align: center;
     }
     
-    .sap-sidebar-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 4px;
+    .sap-logo-container {
+      margin-bottom: 12px;
+    }
+    
+    .sap-logo {
+      max-width: 180px;
+      max-height: 60px;
+      width: auto;
+      height: auto;
+      filter: brightness(0) invert(1);
     }
     
     .sap-sidebar-subtitle {
       font-size: 12px;
-      opacity: 0.8;
-      font-weight: 400;
+      opacity: 0.9;
+      margin: 4px 0 0 0;
     }
     
     .sap-nav {
-      padding: 16px 0;
+      padding: 8px 0;
+      margin: 0;
+      list-style: none;
     }
     
     .sap-nav-item {
-      display: block;
-      padding: 12px 24px;
-      color: rgba(255,255,255,0.9);
+      margin: 2px 8px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .sap-nav-link {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      color: #e0e0e0;
       text-decoration: none;
-      transition: all 0.2s ease;
-      border-left: 3px solid transparent;
       font-size: 14px;
       font-weight: 500;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
     }
     
-    .sap-nav-item:hover {
-      background-color: rgba(255,255,255,0.1);
-      color: white;
-      border-left-color: #00d4ff;
+    .sap-nav-link::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #0070f2, #00a0ff);
+      transition: width 0.3s ease;
+      z-index: -1;
     }
     
-    .sap-nav-item.active {
-      background-color: rgba(255,255,255,0.15);
-      border-left-color: #00d4ff;
+    .sap-nav-link:hover {
+      background: rgba(255,255,255,0.1);
+      color: #ffffff;
+      transform: translateX(4px);
+      box-shadow: 0 4px 12px rgba(0,112,242,0.3);
+    }
+    
+    .sap-nav-link:hover::before {
+      width: 4px;
+    }
+    
+    .sap-nav-link.active {
+      background: linear-gradient(90deg, #0070f2, #00a0ff);
       color: white;
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(0,112,242,0.4);
+    }
+    
+    .sap-nav-link.active::before {
+      width: 100%;
+    }
+    
+    .sap-nav-icon {
+      margin-right: 12px;
+      font-size: 18px;
+      width: 24px;
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    
+    .sap-nav-link:hover .sap-nav-icon {
+      transform: scale(1.1);
     }
     
     /* Main Content Area */
@@ -415,44 +471,210 @@ $module = $_GET['module'] ?? 'dashboard';
       font-weight: 500;
     }
     
-    /* Login Page SAP Style */
+    /* Modern Login Page */
     .sap-login-container {
       min-height: 100vh;
-      background: linear-gradient(135deg, #0070f2 0%, #0040a0 100%);
+      background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 20px;
+      position: relative;
+      overflow: hidden;
     }
     
-    .sap-login-card {
-      background: white;
-      padding: 48px;
-      border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    .sap-login-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 30% 20%, rgba(139, 92, 246, 0.3) 0%, transparent 50%),
+                  radial-gradient(circle at 70% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%);
+    }
+    
+    .sap-login-layout {
+      display: flex;
+      background: rgba(30, 41, 59, 0.95);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
       width: 100%;
-      max-width: 400px;
+      max-width: 900px;
+      min-height: 500px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    .sap-login-title {
-      font-size: 28px;
+    .sap-login-left {
+      flex: 1;
+      background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 40px;
+      position: relative;
+    }
+    
+    .sap-login-left::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.3;
+    }
+    
+    .sap-login-logo {
+      max-width: 200px;
+      margin-bottom: 30px;
+      filter: brightness(0) invert(1);
+      z-index: 1;
+    }
+    
+    .sap-login-brand {
+      text-align: center;
+      color: white;
+      z-index: 1;
+    }
+    
+    .sap-login-brand h1 {
+      font-size: 36px;
       font-weight: 700;
-      color: #32363a;
-      text-align: center;
-      margin-bottom: 8px;
+      margin: 0 0 8px 0;
+      background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
-    .sap-login-subtitle {
-      font-size: 14px;
-      color: #666;
-      text-align: center;
-      margin-bottom: 32px;
+    .sap-login-brand p {
+      font-size: 16px;
+      opacity: 0.8;
+      margin: 0 0 20px 0;
+    }
+    
+    .sap-login-version {
+      font-size: 12px;
+      opacity: 0.6;
+      margin-top: auto;
+      z-index: 1;
+    }
+    
+    .sap-login-right {
+      flex: 1;
+      background: rgba(51, 65, 85, 0.8);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 50px;
+    }
+    
+    .sap-login-welcome {
+      color: white;
+      margin-bottom: 40px;
+    }
+    
+    .sap-login-welcome h2 {
+      font-size: 28px;
+      font-weight: 600;
+      margin: 0 0 8px 0;
     }
     
     .sap-login-form {
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 24px;
+    }
+    
+    .sap-login-form .sap-form-group {
+      position: relative;
+    }
+    
+    .sap-login-form .sap-label {
+      color: #e2e8f0;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: block;
+    }
+    
+    .sap-login-form .sap-input {
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(30, 41, 59, 0.8);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+    
+    .sap-login-form .sap-input:focus {
+      outline: none;
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+      background: rgba(30, 41, 59, 0.9);
+    }
+    
+    .sap-login-form .sap-input::placeholder {
+      color: rgba(148, 163, 184, 0.6);
+    }
+    
+    .sap-login-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 8px 0;
+    }
+    
+    .sap-login-remember {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #e2e8f0;
+      font-size: 14px;
+    }
+    
+    .sap-login-forgot {
+      color: #8b5cf6;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.3s ease;
+    }
+    
+    .sap-login-forgot:hover {
+      color: #a78bfa;
+    }
+    
+    .sap-login-submit {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 8px;
+    }
+    
+    .sap-login-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+    }
+    
+    .sap-login-footer {
+      text-align: center;
+      margin-top: 30px;
+      color: rgba(148, 163, 184, 0.8);
+      font-size: 12px;
     }
     
     .sap-alert {
@@ -492,29 +714,56 @@ $module = $_GET['module'] ?? 'dashboard';
 <body>
 
   <?php if (!$usuario_logado): ?>
-  <!-- LOGIN PAGE SAP STYLE -->
+  <!-- MODERN LOGIN PAGE -->
   <div class="sap-login-container">
-    <div class="sap-login-card">
-      <h1 class="sap-login-title">SGQ OTI</h1>
-      <p class="sap-login-subtitle">Sistema de Gestão da Qualidade</p>
+    <div class="sap-login-layout">
+      <!-- Left Side - Branding -->
+      <div class="sap-login-left">
+        <img src="assets/images/logo.png" alt="SGQ OTI" class="sap-login-logo">
+        <div class="sap-login-brand">
+          <h1>SGQ OTI</h1>
+          <p>Sistema de Gestão da Qualidade</p>
+        </div>
+        <div class="sap-login-version">Versão 1.0</div>
+      </div>
       
-      <?php if (isset($erro_login)): ?>
-        <div class="sap-alert sap-alert-error">
-          <?= htmlspecialchars($erro_login) ?>
+      <!-- Right Side - Login Form -->
+      <div class="sap-login-right">
+        <div class="sap-login-welcome">
+          <h2>Bem-vindo</h2>
         </div>
-      <?php endif; ?>
-      
-      <form method="POST" class="sap-login-form">
-        <div class="sap-form-group">
-          <label class="sap-label">E-mail</label>
-          <input type="email" name="email" class="sap-input" required>
+        
+        <?php if (isset($erro_login)): ?>
+          <div class="sap-alert sap-alert-error">
+            <?= htmlspecialchars($erro_login) ?>
+          </div>
+        <?php endif; ?>
+        
+        <form method="POST" class="sap-login-form">
+          <div class="sap-form-group">
+            <label class="sap-label">E-mail</label>
+            <input type="email" name="email" class="sap-input" placeholder="seu@email.com" required>
+          </div>
+          <div class="sap-form-group">
+            <label class="sap-label">Senha</label>
+            <input type="password" name="senha" class="sap-input" placeholder="••••••••" required>
+          </div>
+          
+          <div class="sap-login-options">
+            <label class="sap-login-remember">
+              <input type="checkbox" name="lembrar">
+              <span>Lembrar-me</span>
+            </label>
+            <a href="#" class="sap-login-forgot">Esqueceu a senha?</a>
+          </div>
+          
+          <button type="submit" class="sap-login-submit">Entrar</button>
+        </form>
+        
+        <div class="sap-login-footer">
+          © 2025 SGQ OTI - Todos os direitos reservados.
         </div>
-        <div class="sap-form-group">
-          <label class="sap-label">Senha</label>
-          <input type="password" name="senha" class="sap-input" required>
-        </div>
-        <button type="submit" class="sap-button">Entrar no Sistema</button>
-      </form>
+      </div>
     </div>
   </div>
   <?php else: ?>
@@ -524,22 +773,65 @@ $module = $_GET['module'] ?? 'dashboard';
     <!-- SIDEBAR SAP STYLE -->
     <aside class="sap-sidebar">
       <div class="sap-sidebar-header">
-        <h1 class="sap-sidebar-title">SGQ OTI</h1>
+        <div class="sap-logo-container">
+          <img src="assets/images/logo.png" alt="SGQ OTI" class="sap-logo">
+        </div>
         <p class="sap-sidebar-subtitle">Sistema de Gestão da Qualidade</p>
       </div>
       
       <nav class="sap-nav">
-        <a href="?module=dashboard" class="sap-nav-item <?= $module == 'dashboard' ? 'active' : '' ?>">📊 Dashboard</a>
-        <a href="?module=usuarios" class="sap-nav-item <?= $module == 'usuarios' ? 'active' : '' ?>">👥 Usuários</a>
-        <a href="?module=toners" class="sap-nav-item <?= $module == 'toners' ? 'active' : '' ?>">🖨️ Controle de Toners</a>
-        <a href="?module=homologacoes" class="sap-nav-item <?= $module == 'homologacoes' ? 'active' : '' ?>">✅ Homologações</a>
-        <a href="?module=amostragens" class="sap-nav-item <?= $module == 'amostragens' ? 'active' : '' ?>">🧪 Amostragens</a>
-        <a href="?module=garantias" class="sap-nav-item <?= $module == 'garantias' ? 'active' : '' ?>">🛡️ Garantias</a>
-        <a href="?module=pops-its" class="sap-nav-item <?= $module == 'pops-its' ? 'active' : '' ?>">📋 POPs e ITs</a>
-        <a href="?module=fluxogramas" class="sap-nav-item <?= $module == 'fluxogramas' ? 'active' : '' ?>">📊 Fluxogramas</a>
-        <a href="?module=auditorias" class="sap-nav-item <?= $module == 'auditorias' ? 'active' : '' ?>">🔍 Auditorias</a>
-        <a href="?module=dinamicas" class="sap-nav-item <?= $module == 'dinamicas' ? 'active' : '' ?>">⚡ Dinâmicas</a>
-        <a href="?module=configuracoes" class="sap-nav-item <?= $module == 'configuracoes' ? 'active' : '' ?>">⚙️ Configurações</a>
+        <ul class="sap-nav">
+          <li class="sap-nav-item">
+            <a href="?module=dashboard" class="sap-nav-link <?= $module == 'dashboard' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">📊</span>Dashboard
+            </a>
+          </li>
+          <li class="sap-nav-item">
+            <a href="?module=toners" class="sap-nav-link <?= $module == 'toners' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">🖨️</span>Controle de Toners
+            </a>
+          </li>
+          <li class="sap-nav-item">
+            <a href="?module=homologacoes" class="sap-nav-link <?= $module == 'homologacoes' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">✅</span>Homologações
+            </a>
+          </li>
+          <li class="sap-nav-item">
+            <a href="?module=amostragens" class="sap-nav-link <?= $module == 'amostragens' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">🧪</span>Amostragens
+            </a>
+          </li>
+          <li class="sap-nav-item">
+            <a href="?module=garantias" class="sap-nav-link <?= $module == 'garantias' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">🛡️</span>Garantias
+            </a>
+          </li>
+          <li class="sap-nav-item">
+            <a href="?module=pops-its" class="sap-nav-link <?= $module == 'pops-its' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">📋</span>POPs e ITs
+            </a>
+          </li>
+          <li class="sap-nav-item">
+            <a href="?module=fluxogramas" class="sap-nav-link <?= $module == 'fluxogramas' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">📊</span>Fluxogramas
+            </a>
+          </li>
+          <li class="sap-nav-item">
+            <a href="?module=auditorias" class="sap-nav-link <?= $module == 'auditorias' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">🔍</span>Auditorias
+            </a>
+          </li>
+          <li class="sap-nav-item">
+            <a href="?module=dinamicas" class="sap-nav-link <?= $module == 'dinamicas' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">⚡</span>Dinâmicas
+            </a>
+          </li>
+          <li class="sap-nav-item">
+            <a href="?module=configuracoes" class="sap-nav-link <?= $module == 'configuracoes' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">⚙️</span>Configurações
+            </a>
+          </li>
+        </ul>
       </nav>
     </aside>
 
@@ -582,7 +874,10 @@ $module = $_GET['module'] ?? 'dashboard';
       <!-- CONTENT AREA -->
       <div class="sap-content">
       
-        <?php if ($module == 'usuarios'): ?>
+        <?php if ($module == 'configuracoes'): ?>
+          <?php include 'modules/configuracoes.php'; ?>
+          
+        <?php elseif ($module == 'usuarios'): ?>
         <!-- FORMULÁRIO DE USUÁRIOS SAP STYLE -->
         <div class="sap-card">
           <div class="sap-card-header">
