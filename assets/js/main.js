@@ -702,12 +702,12 @@ class SGQApp {
         console.log('Dados enviados:', formData);
         this.addToLog('🔄 Enviando dados: ' + JSON.stringify(formData), 'info');
         
-        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? 'backend/api/users.php' 
-            : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
+        const apiUrl = 'backend/api/users.php';
             
         console.log('URL da API:', apiUrl);
+        console.log('Hostname detectado:', window.location.hostname);
         this.addToLog('🌐 URL da API: ' + apiUrl, 'info');
+        this.addToLog('🖥️ Hostname: ' + window.location.hostname, 'info');
         
         try {
             const response = await fetch(apiUrl, {
@@ -734,11 +734,18 @@ class SGQApp {
             }
             
             if (result.success) {
-                this.addUserToTable(result.data);
+                // NÃO adicionar à tabela localmente - apenas recarregar do banco
                 this.hideUserModal();
                 this.showAlert('Usuário cadastrado com sucesso!', 'success');
                 this.addToLog('✅ Usuário cadastrado: ' + result.data.name, 'success');
-                this.loadExistingUsers(); // Recarregar lista
+                
+                // Limpar formulário
+                document.getElementById('user-registration-form').reset();
+                
+                // Recarregar lista do banco para garantir sincronização
+                setTimeout(() => {
+                    this.loadExistingUsers();
+                }, 500);
             } else {
                 this.showAlert('Erro ao cadastrar usuário: ' + result.message, 'error');
                 this.addToLog('❌ Erro no cadastro: ' + result.message, 'error');
@@ -786,9 +793,7 @@ class SGQApp {
 
     async loadExistingUsers() {
         try {
-            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                ? 'backend/api/users.php' 
-                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
+            const apiUrl = 'backend/api/users.php';
                 
             const response = await fetch(apiUrl, {
                 method: 'GET'
