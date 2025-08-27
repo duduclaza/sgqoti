@@ -194,7 +194,7 @@ function performSystemCheck() {
         if ($connectionTest['success']) {
             $conn = $database->getConnection();
             
-            $tables = ['toners', 'movimentacoes_estoque', 'usuarios'];
+            $tables = ['usuarios'];
             $tablesExist = [];
             
             foreach ($tables as $table) {
@@ -425,42 +425,6 @@ class Database {
     public function createTables() {
         try {
             $conn = $this->getConnection();
-            
-            // Tabela de toners
-            $sql_toners = "CREATE TABLE IF NOT EXISTS toners (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                marca VARCHAR(100) NOT NULL,
-                modelo VARCHAR(100) NOT NULL,
-                cor VARCHAR(50) NOT NULL,
-                codigo VARCHAR(100),
-                quantidade INT DEFAULT 0,
-                estoque_minimo INT DEFAULT 5,
-                localizacao VARCHAR(100),
-                observacoes TEXT,
-                data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_marca (marca),
-                INDEX idx_modelo (modelo),
-                INDEX idx_cor (cor)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-            
-            $conn->exec($sql_toners);
-            
-            // Tabela de movimentações de estoque
-            $sql_movimentacoes = "CREATE TABLE IF NOT EXISTS movimentacoes_estoque (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                toner_id INT NOT NULL,
-                tipo_movimentacao ENUM(\'entrada\', \'saida\') NOT NULL,
-                quantidade INT NOT NULL,
-                motivo VARCHAR(255),
-                usuario VARCHAR(100),
-                data_movimentacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (toner_id) REFERENCES toners(id) ON DELETE CASCADE,
-                INDEX idx_toner_id (toner_id),
-                INDEX idx_data (data_movimentacao)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
-            
-            $conn->exec($sql_movimentacoes);
             
             // Tabela de usuários (para futuras funcionalidades)
             $sql_usuarios = "CREATE TABLE IF NOT EXISTS usuarios (

@@ -145,40 +145,6 @@ class Database {
 
     private function getTableSchema() {
         return [
-            'toners' => "CREATE TABLE IF NOT EXISTS toners (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                codigo VARCHAR(50) NOT NULL UNIQUE,
-                modelo VARCHAR(100) NOT NULL,
-                marca VARCHAR(50) NOT NULL,
-                cor VARCHAR(30) NOT NULL,
-                tipo ENUM('original', 'compativel', 'remanufaturado') NOT NULL,
-                quantidade_estoque INT DEFAULT 0,
-                quantidade_minima INT DEFAULT 5,
-                preco_unitario DECIMAL(10,2) DEFAULT 0.00,
-                fornecedor VARCHAR(100),
-                observacoes TEXT,
-                status ENUM('ativo', 'inativo') DEFAULT 'ativo',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_codigo (codigo),
-                INDEX idx_modelo (modelo),
-                INDEX idx_status (status)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
-            
-            'movimentacoes_estoque' => "CREATE TABLE IF NOT EXISTS movimentacoes_estoque (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                toner_id INT NOT NULL,
-                tipo_movimentacao ENUM('entrada', 'saida', 'ajuste') NOT NULL,
-                quantidade INT NOT NULL,
-                quantidade_anterior INT NOT NULL,
-                quantidade_atual INT NOT NULL,
-                motivo VARCHAR(200),
-                usuario VARCHAR(100),
-                data_movimentacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (toner_id) REFERENCES toners(id) ON DELETE CASCADE,
-                INDEX idx_toner_id (toner_id),
-                INDEX idx_data (data_movimentacao)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
             
             'usuarios' => "CREATE TABLE IF NOT EXISTS usuarios (
                 id INT AUTO_INCREMENT PRIMARY KEY,
