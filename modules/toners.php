@@ -26,10 +26,16 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-semibold text-gray-800">Cadastro de Toners</h3>
-                <button onclick="openTonerModal()" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                    <i class="fas fa-plus mr-2"></i>Novo Toner
-                </button>
+                <div class="flex space-x-3">
+                    <button onclick="openImportModal()" 
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-file-excel mr-2"></i>Importar Planilha
+                    </button>
+                    <button onclick="openTonerModal()" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-plus mr-2"></i>Novo Toner
+                    </button>
+                </div>
             </div>
             
             <!-- Grid de Toners -->
@@ -190,6 +196,109 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Importação de Planilha -->
+<div id="import-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-[9999]">
+    <div class="flex items-center justify-center min-h-screen p-2 sm:p-4 lg:p-6">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative z-[10000]">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Importar Planilha de Toners</h3>
+                    <button onclick="closeImportModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Seção de Download da Planilha Exemplo -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-download text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-semibold text-blue-900 mb-2">1. Baixar Planilha Exemplo</h4>
+                                <p class="text-sm text-blue-700 mb-3">
+                                    Baixe a planilha modelo com os campos corretos para preenchimento.
+                                </p>
+                                <button onclick="downloadExampleSpreadsheet()" 
+                                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                                    <i class="fas fa-file-excel mr-2"></i>Baixar Exemplo
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção de Upload da Planilha -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-upload text-green-600 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-semibold text-green-900 mb-2">2. Selecionar Planilha Preenchida</h4>
+                                <p class="text-sm text-green-700 mb-3">
+                                    Selecione a planilha preenchida para importar os dados dos toners.
+                                </p>
+                                
+                                <div class="space-y-3">
+                                    <input type="file" id="import-file" accept=".xlsx,.xls,.csv" 
+                                           class="hidden" onchange="handleFileSelect(this)">
+                                    
+                                    <div id="file-drop-zone" 
+                                         class="border-2 border-dashed border-green-300 rounded-lg p-6 text-center cursor-pointer hover:border-green-400 transition-colors"
+                                         onclick="document.getElementById('import-file').click()">
+                                        <i class="fas fa-cloud-upload-alt text-green-500 text-2xl mb-2"></i>
+                                        <p class="text-sm text-green-700">
+                                            <span class="font-medium">Clique para selecionar</span> ou arraste a planilha aqui
+                                        </p>
+                                        <p class="text-xs text-green-600 mt-1">
+                                            Formatos: .xlsx, .xls, .csv (máx. 5MB)
+                                        </p>
+                                    </div>
+                                    
+                                    <div id="selected-file" class="hidden bg-gray-50 border rounded-lg p-3">
+                                        <div class="flex items-center space-x-2">
+                                            <i class="fas fa-file-excel text-green-600"></i>
+                                            <span id="file-name" class="text-sm text-gray-700 flex-1"></span>
+                                            <button onclick="clearSelectedFile()" class="text-red-500 hover:text-red-700">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progresso da Importação -->
+                    <div id="import-progress" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="animate-spin">
+                                <i class="fas fa-spinner text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-900">Importando dados...</p>
+                                <p class="text-xs text-yellow-700">Aguarde enquanto processamos a planilha.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-6 border-t mt-6">
+                    <button type="button" onclick="closeImportModal()" 
+                            class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors">
+                        Cancelar
+                    </button>
+                    <button id="import-btn" onclick="importSpreadsheet()" disabled
+                            class="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-upload mr-2"></i>Importar Dados
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -490,4 +599,145 @@ function deleteToner(id) {
         });
     }
 }
+
+// Funções do modal de importação
+function openImportModal() {
+    document.getElementById('import-modal').classList.remove('hidden');
+    clearSelectedFile();
+}
+
+function closeImportModal() {
+    document.getElementById('import-modal').classList.add('hidden');
+    clearSelectedFile();
+    document.getElementById('import-progress').classList.add('hidden');
+}
+
+function downloadExampleSpreadsheet() {
+    // Criar dados de exemplo
+    const exampleData = [
+        ['Modelo', 'Cor', 'Tipo', 'Capacidade', 'Peso Cheio (g)', 'Peso Vazio (g)', 'Preço (R$)'],
+        ['HP CF280A', 'Black', 'Original', '2700', '1200.5', '180.2', '89.90'],
+        ['HP CE285A', 'Black', 'Compativel', '1600', '950.0', '165.5', '45.50'],
+        ['Canon 728', 'Black', 'Remanufaturado', '2100', '1100.8', '175.3', '65.00'],
+        ['HP CF541A', 'Cyan', 'Original', '1300', '850.2', '150.1', '125.90']
+    ];
+    
+    // Converter para CSV
+    const csvContent = exampleData.map(row => 
+        row.map(cell => `"${cell}"`).join(',')
+    ).join('\n');
+    
+    // Criar e baixar arquivo
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'exemplo_toners.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function handleFileSelect(input) {
+    const file = input.files[0];
+    if (file) {
+        // Validar tamanho (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            alert('Arquivo muito grande. Máximo 5MB permitido.');
+            input.value = '';
+            return;
+        }
+        
+        // Validar tipo
+        const allowedTypes = ['.xlsx', '.xls', '.csv'];
+        const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+        if (!allowedTypes.includes(fileExtension)) {
+            alert('Tipo de arquivo não permitido. Use .xlsx, .xls ou .csv');
+            input.value = '';
+            return;
+        }
+        
+        // Mostrar arquivo selecionado
+        document.getElementById('file-name').textContent = file.name;
+        document.getElementById('selected-file').classList.remove('hidden');
+        document.getElementById('import-btn').disabled = false;
+    }
+}
+
+function clearSelectedFile() {
+    document.getElementById('import-file').value = '';
+    document.getElementById('selected-file').classList.add('hidden');
+    document.getElementById('import-btn').disabled = true;
+}
+
+function importSpreadsheet() {
+    const fileInput = document.getElementById('import-file');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert('Selecione um arquivo para importar');
+        return;
+    }
+    
+    // Mostrar progresso
+    document.getElementById('import-progress').classList.remove('hidden');
+    document.getElementById('import-btn').disabled = true;
+    
+    // Criar FormData para envio
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    fetch('backend/api/import-toners.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        document.getElementById('import-progress').classList.add('hidden');
+        
+        if (result.success) {
+            alert(`Importação concluída! ${result.imported} toners importados com sucesso.`);
+            closeImportModal();
+            loadToners();
+        } else {
+            alert('Erro na importação: ' + result.message);
+            document.getElementById('import-btn').disabled = false;
+        }
+    })
+    .catch(error => {
+        document.getElementById('import-progress').classList.add('hidden');
+        document.getElementById('import-btn').disabled = false;
+        console.error('Erro:', error);
+        alert('Erro ao importar planilha');
+    });
+}
+
+// Drag and drop functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const dropZone = document.getElementById('file-drop-zone');
+    
+    if (dropZone) {
+        dropZone.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropZone.classList.add('border-green-400', 'bg-green-50');
+        });
+        
+        dropZone.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('border-green-400', 'bg-green-50');
+        });
+        
+        dropZone.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropZone.classList.remove('border-green-400', 'bg-green-50');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                document.getElementById('import-file').files = files;
+                handleFileSelect(document.getElementById('import-file'));
+            }
+        });
+    }
+});
 </script>
