@@ -681,6 +681,7 @@ class SGQApp {
         event.preventDefault();
         
         const formData = {
+            action: 'create_user',
             name: document.getElementById('user-name').value,
             email: document.getElementById('user-email').value,
             username: document.getElementById('user-username').value,
@@ -689,13 +690,31 @@ class SGQApp {
             status: document.getElementById('user-status').value
         };
         
-        // Aqui você pode implementar a chamada para a API do backend
-        console.log('Dados do usuário:', formData);
-        
-        // Simular salvamento por enquanto
-        this.addUserToTable(formData);
-        this.hideUserModal();
-        this.showAlert('Usuário cadastrado com sucesso!', 'success');
+        try {
+            const response = await fetch('backend/api/users.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this.addUserToTable(result.data);
+                this.hideUserModal();
+                this.showAlert('Usuário cadastrado com sucesso!', 'success');
+                this.addToLog('✅ Usuário cadastrado: ' + result.data.name, 'success');
+            } else {
+                this.showAlert('Erro ao cadastrar usuário: ' + result.message, 'error');
+                this.addToLog('❌ Erro no cadastro: ' + result.message, 'error');
+            }
+            
+        } catch (error) {
+            this.showAlert('Erro de conexão: ' + error.message, 'error');
+            this.addToLog('❌ Erro de conexão: ' + error.message, 'error');
+        }
     }
 
     addUserToTable(userData) {
