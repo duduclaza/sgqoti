@@ -730,13 +730,30 @@ class SGQApp {
         if (form) {
             form.reset();
         }
+        
+        // Resetar estado de edição
+        this.editingUserId = null;
+        
+        // Resetar título e botão do modal
+        const modalTitle = document.querySelector('#user-modal h4');
+        if (modalTitle) {
+            modalTitle.textContent = 'Cadastro de Usuário';
+        }
+        
+        const submitBtn = document.querySelector('#user-registration-form button[type="submit"]');
+        if (submitBtn) {
+            submitBtn.textContent = 'Salvar Usuário';
+        }
     }
 
     async saveUser(event) {
         event.preventDefault();
         
+        // Verificar se está editando ou criando
+        const isEditing = !!this.editingUserId;
+        
         const formData = {
-            action: 'create_user',
+            action: isEditing ? 'update_user' : 'create_user',
             name: document.getElementById('user-name').value,
             email: document.getElementById('user-email').value,
             username: document.getElementById('user-username').value,
@@ -744,6 +761,11 @@ class SGQApp {
             role: document.getElementById('user-role').value,
             status: document.getElementById('user-status').value
         };
+        
+        // Adicionar ID se estiver editando
+        if (isEditing) {
+            formData.id = this.editingUserId;
+        }
         
         // Debug: Log dos dados enviados
         console.log('Dados enviados:', formData);
@@ -830,8 +852,8 @@ class SGQApp {
                 </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
-                <button class="text-red-600 hover:text-red-900">Excluir</button>
+                <button onclick="window.app.editUser(${userData.id})" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
+                <button onclick="window.app.deleteUser(${userData.id})" class="text-red-600 hover:text-red-900">Excluir</button>
             </td>
         `;
         
@@ -1232,6 +1254,98 @@ class SGQApp {
         } finally {
             button.innerHTML = originalText;
             button.disabled = false;
+        }
+    }
+
+    // Editar usuário
+    async editUser(userId) {
+        try {
+            // Buscar dados do usuário
+            const apiUrl = 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
+            const response = await fetch(`${apiUrl}?id=${userId}`, {
+                method: 'GET'
+            });
+            
+            const result = await response.json();
+            
+            if (result.success && result.data) {
+                const user = result.data;
+                
+                // Preencher formulário com dados do usuário
+                document.getElementById('user-name').value = user.nome || '';
+                document.getElementById('user-email').value = user.email || '';
+                document.getElementById('user-username').value = user.usuario || '';
+                document.getElementById('user-password').value = ''; // Não mostrar senha
+                document.getElementById('user-role').value = user.perfil || '';
+                document.getElementById('user-status').value = user.status || '';
+                
+                // Alterar título do modal
+                const modalTitle = document.querySelector('#user-modal h4');
+                if (modalTitle) {
+                    modalTitle.textContent = 'Editar Usuário';
+                }
+                
+                // Alterar texto do botão
+                const submitBtn = document.querySelector('#user-registration-form button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.textContent = 'Atualizar Usuário';
+                }
+                
+                // Armazenar ID do usuário sendo editado
+                this.editingUserId = userId;
+                
+                // Mostrar modal
+                this.showUserModal();
+                
+            } else {
+                this.showAlert('Erro ao carregar dados do usuário', 'error');
+            }
+            
+        } catch (error) {
+            console.error('Erro ao buscar usuário:', error);
+            this.showAlert('Erro ao carregar usuário: ' + error.message, 'error');
+        }
+    }
+
+    // Excluir usuário
+    async deleteUser(userId) {
+        if (!confirm('Tem certeza que deseja excluir este usuário? Esta ação não pode ser desfeita.')) {
+            return;
+        }
+        
+        try {
+            const apiUrl = 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
+            const response = await fetch(apiUrl, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'delete_user',
+                    id: userId
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                this.showAlert('Usuário excluído com sucesso!', 'success');
+                this.addToLog('✅ Usuário excluído: ID ' + userId, 'success');
+                
+                // Recarregar lista
+                setTimeout(() => {
+                    this.loadExistingUsers();
+                }, 500);
+                
+            } else {
+                this.showAlert('Erro ao excluir usuário: ' + result.message, 'error');
+                this.addToLog('❌ Erro ao excluir: ' + result.message, 'error');
+            }
+            
+        } catch (error) {
+            console.error('Erro ao excluir usuário:', error);
+            this.showAlert('Erro ao excluir usuário: ' + error.message, 'error');
+            this.addToLog('❌ Erro ao excluir: ' + error.message, 'error');
         }
     }
 }

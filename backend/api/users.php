@@ -68,9 +68,81 @@ if ($method === 'POST') {
             break;
     }
 } else if ($method === 'GET') {
-    // Listar usuários
-    Logger::log('GET list users');
-    listUsers();
+    // Verificar se é busca por ID específico
+    if (isset($_GET['id']) && !empty($_GET['id'])) {
+        Logger::log('GET single user', ['id' => $_GET['id']]);
+        getUserById($_GET['id']);
+    } else {
+        // Listar todos os usuários
+        Logger::log('GET list users');
+        listUsers();
+    }
+} else if ($method === 'DELETE') {
+    // Tentar ler dados JSON
+    $raw = file_get_contents("php://input");
+    $input = json_decode($raw, true);
+    Logger::log('DELETE payload received', [
+        'raw_length' => strlen($raw ?? ''),
+        'json_decoded' => is_array($input),
+    ]);
+
+    if (!$input) {
+        Logger::log('DELETE without input', [], 'WARN');
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Dados inválidos'
+        ]);
+        exit;
+    }
+    
+    $action = $input['action'] ?? '';
+    Logger::log('DELETE action resolved', [ 'action' => $action ]);
+    
+    if ($action === 'delete_user') {
+        Logger::log('Action delete_user called via DELETE method');
+        deleteUser($input);
+    } else {
+        Logger::log('Unknown DELETE action', [ 'action' => $action ], 'WARN');
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Ação não reconhecida: ' . $action
+        ]);
+    }
+} else if ($method === 'PUT') {
+    // Tentar ler dados JSON
+    $raw = file_get_contents("php://input");
+    $input = json_decode($raw, true);
+    Logger::log('PUT payload received', [
+        'raw_length' => strlen($raw ?? ''),
+        'json_decoded' => is_array($input),
+    ]);
+
+    if (!$input) {
+        Logger::log('PUT without input', [], 'WARN');
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Dados inválidos'
+        ]);
+        exit;
+    }
+    
+    $action = $input['action'] ?? '';
+    Logger::log('PUT action resolved', [ 'action' => $action ]);
+    
+    if ($action === 'update_user') {
+        Logger::log('Action update_user called via PUT method');
+        updateUser($input);
+    } else {
+        Logger::log('Unknown PUT action', [ 'action' => $action ], 'WARN');
+        http_response_code(400);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Ação não reconhecida: ' . $action
+        ]);
+    }
 } else {
     Logger::log('Method not allowed', [ 'method' => $method ], 'WARN');
     http_response_code(405);
@@ -303,6 +375,49 @@ function deleteUser($data) {
         echo json_encode([
             'success' => false,
             'message' => 'Erro ao excluir usuário: ' . $e->getMessage(),
+            'timestamp' => date('Y-m-d H:i:s')
+        ]);
+    }
+}
+
+function getUserById($id) {
+    try {
+        $database = new Database();
+        $conn = $database->getConnection();
+        
+        $stmt = $conn->prepare("
+            SELECT id, nome, email, usuario, perfil, status, ultimo_acesso, created_at 
+            FROM usuarios 
+            WHERE id = ?
+        ");
+        
+        $stmt->execute([$id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($user) {
+            Logger::log('getUserById success', ['id' => $id]);
+            echo json_encode([
+                'success' => true,
+                'message' => 'Usuário encontrado',
+                'data' => $user,
+                'timestamp' => date('Y-m-d H:i:s')
+            ]);
+        } else {
+            Logger::log('getUserById not found', ['id' => $id], 'WARN');
+            http_response_code(404);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Usuário não encontrado',
+                'timestamp' => date('Y-m-d H:i:s')
+            ]);
+        }
+        
+    } catch (Exception $e) {
+        Logger::log('getUserById exception', ['error' => $e->getMessage(), 'id' => $id], 'ERROR');
+        http_response_code(500);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Erro ao buscar usuário: ' . $e->getMessage(),
             'timestamp' => date('Y-m-d H:i:s')
         ]);
     }
