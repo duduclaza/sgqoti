@@ -881,6 +881,9 @@ $module = $_GET['module'] ?? 'dashboard';
         <?php if ($module == 'configuracoes'): ?>
           <?php include 'modules/configuracoes.php'; ?>
           
+        <?php elseif ($module == 'toners'): ?>
+          <?php include 'modules/toners.php'; ?>
+          
         <?php elseif ($module == 'usuarios'): ?>
         <!-- FORMULÁRIO DE USUÁRIOS SAP STYLE -->
         <div class="sap-card">
