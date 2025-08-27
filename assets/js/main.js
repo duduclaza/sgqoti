@@ -698,6 +698,10 @@ class SGQApp {
             status: document.getElementById('user-status').value
         };
         
+        // Debug: Log dos dados enviados
+        console.log('Dados enviados:', formData);
+        this.addToLog('🔄 Enviando dados: ' + JSON.stringify(formData), 'info');
+        
         try {
             const response = await fetch('backend/api/users.php', {
                 method: 'POST',
@@ -707,19 +711,34 @@ class SGQApp {
                 body: JSON.stringify(formData)
             });
             
-            const result = await response.json();
+            // Debug: Log da resposta HTTP
+            console.log('Status da resposta:', response.status);
+            this.addToLog('📡 Status HTTP: ' + response.status, 'info');
+            
+            const responseText = await response.text();
+            console.log('Resposta bruta:', responseText);
+            this.addToLog('📄 Resposta: ' + responseText.substring(0, 200), 'info');
+            
+            let result;
+            try {
+                result = JSON.parse(responseText);
+            } catch (parseError) {
+                throw new Error('Resposta não é JSON válido: ' + responseText);
+            }
             
             if (result.success) {
                 this.addUserToTable(result.data);
                 this.hideUserModal();
                 this.showAlert('Usuário cadastrado com sucesso!', 'success');
                 this.addToLog('✅ Usuário cadastrado: ' + result.data.name, 'success');
+                this.loadExistingUsers(); // Recarregar lista
             } else {
                 this.showAlert('Erro ao cadastrar usuário: ' + result.message, 'error');
                 this.addToLog('❌ Erro no cadastro: ' + result.message, 'error');
             }
             
         } catch (error) {
+            console.error('Erro completo:', error);
             this.showAlert('Erro de conexão: ' + error.message, 'error');
             this.addToLog('❌ Erro de conexão: ' + error.message, 'error');
         }
