@@ -620,6 +620,9 @@ class SGQApp {
         if (userForm) {
             userForm.addEventListener('submit', (e) => this.saveUser(e));
         }
+        
+        // Carregar usuários existentes ao abrir a aba
+        this.loadExistingUsers();
     }
 
     switchConfigTab(tabName) {
@@ -647,6 +650,11 @@ class SGQApp {
         const activeContent = document.getElementById(`${tabName}-tab`);
         if (activeContent) {
             activeContent.classList.remove('hidden');
+            
+            // Se for a aba de usuários, carregar dados
+            if (tabName === 'users') {
+                this.loadExistingUsers();
+            }
         }
     }
 
@@ -748,6 +756,38 @@ class SGQApp {
         `;
         
         tableBody.appendChild(row);
+    }
+
+    async loadExistingUsers() {
+        try {
+            const response = await fetch('backend/api/users.php', {
+                method: 'GET'
+            });
+            
+            const result = await response.json();
+            
+            if (result.success && result.data && result.data.length > 0) {
+                const tableBody = document.getElementById('users-table-body');
+                if (tableBody) {
+                    tableBody.innerHTML = ''; // Limpar tabela
+                    
+                    result.data.forEach(user => {
+                        this.addUserToTable({
+                            id: user.id,
+                            name: user.nome,
+                            email: user.email,
+                            username: user.usuario,
+                            role: user.perfil,
+                            status: user.status
+                        });
+                    });
+                    
+                    this.addToLog(`✅ ${result.data.length} usuários carregados`, 'success');
+                }
+            }
+        } catch (error) {
+            console.log('Nenhum usuário encontrado ou erro na conexão:', error.message);
+        }
     }
 
     async checkConnectionStatus() {
