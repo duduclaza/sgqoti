@@ -133,7 +133,7 @@ $module = $_GET['module'] ?? 'dashboard';
       background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
       border-right: 1px solid #404040;
       padding: 0;
-      z-index: 1000;
+      z-index: 100;
       overflow-y: auto;
       box-shadow: 2px 0 10px rgba(0,0,0,0.3);
     }

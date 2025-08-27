@@ -87,9 +87,9 @@
 </div>
 
 <!-- Modal de Cadastro de Toner -->
-<div id="toner-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+<div id="toner-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-[9999]">
     <div class="flex items-center justify-center min-h-screen p-2 sm:p-4 lg:p-6">
-        <div class="bg-white rounded-lg shadow-xl w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-4xl xl:max-w-5xl max-h-screen overflow-y-auto">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl lg:max-w-4xl max-h-[90vh] overflow-y-auto relative z-[10000]">
             <div class="p-3 sm:p-4 lg:p-6">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-semibold text-gray-800">Cadastro de Toner</h3>
@@ -181,12 +181,12 @@
                     
                     <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4 sm:pt-6 border-t mt-4 sm:mt-6">
                         <button type="button" onclick="closeTonerModal()" 
-                                class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors text-sm sm:text-base">
+                                class="w-full sm:w-auto px-6 py-3 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors text-sm sm:text-base">
                             Cancelar
                         </button>
                         <button type="submit" 
-                                class="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base">
-                            Salvar Toner
+                                class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base">
+                            <i class="fas fa-save mr-2"></i>Salvar Toner
                         </button>
                     </div>
                 </form>
@@ -207,6 +207,11 @@
 
 #toner-modal {
     backdrop-filter: blur(4px);
+    z-index: 9999 !important;
+}
+
+#toner-modal > div {
+    z-index: 10000 !important;
 }
 
 /* Modal responsivo adicional */
