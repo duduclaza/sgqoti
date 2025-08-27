@@ -1238,7 +1238,8 @@ class SGQApp {
 
 // Inicializar aplicação quando DOM estiver pronto
 document.addEventListener('DOMContentLoaded', () => {
-    window.sgqApp = new SGQApp();
+    window.app = new SGQApp();
+    window.sgqApp = window.app; // Manter compatibilidade
 });
 
 // Exportar para uso global
