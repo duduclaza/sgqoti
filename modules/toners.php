@@ -88,9 +88,9 @@
 
 <!-- Modal de Cadastro de Toner -->
 <div id="toner-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
-    <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
-            <div class="p-6">
+    <div class="flex items-center justify-center min-h-screen p-2 sm:p-4 lg:p-6">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-xs sm:max-w-md md:max-w-lg lg:max-w-4xl xl:max-w-5xl max-h-screen overflow-y-auto">
+            <div class="p-3 sm:p-4 lg:p-6">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-semibold text-gray-800">Cadastro de Toner</h3>
                     <button onclick="closeTonerModal()" class="text-gray-400 hover:text-gray-600">
@@ -98,18 +98,18 @@
                     </button>
                 </div>
                 
-                <form id="toner-form" class="space-y-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Modelo *</label>
+                <form id="toner-form" class="space-y-3 sm:space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                        <div class="sm:col-span-2 lg:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Modelo *</label>
                             <input type="text" id="modelo" name="modelo" required
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                   class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Cor *</label>
+                        <div class="lg:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Cor *</label>
                             <select id="cor" name="cor" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Selecione...</option>
                                 <option value="Black">Black</option>
                                 <option value="Cyan">Cyan</option>
@@ -118,10 +118,10 @@
                             </select>
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo *</label>
+                        <div class="lg:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Tipo *</label>
                             <select id="tipo" name="tipo" required
-                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                 <option value="">Selecione...</option>
                                 <option value="Compativel">Compatível</option>
                                 <option value="Original">Original</option>
@@ -129,63 +129,63 @@
                             </select>
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Capacidade (folhas) *</label>
+                        <div class="lg:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Capacidade (folhas) *</label>
                             <input type="number" id="capacidade" name="capacidade" required min="1"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    onchange="calculateValues()">
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Peso Cheio (g) *</label>
+                        <div class="lg:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Peso Cheio (g) *</label>
                             <input type="number" id="peso_cheio" name="peso_cheio" required min="0" step="0.1"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    onchange="calculateValues()">
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Peso Vazio (g) *</label>
+                        <div class="lg:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Peso Vazio (g) *</label>
                             <input type="number" id="peso_vazio" name="peso_vazio" required min="0" step="0.1"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    onchange="calculateValues()">
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Gramatura (g)</label>
+                        <div class="lg:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Gramatura (g)</label>
                             <input type="number" id="gramatura" name="gramatura" readonly step="0.1"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
-                            <small class="text-gray-500">Calculado automaticamente</small>
+                                   class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
+                            <small class="text-xs text-gray-500">Calculado automaticamente</small>
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Preço (R$) *</label>
+                        <div class="lg:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Preço (R$) *</label>
                             <input type="number" id="preco" name="preco" required min="0" step="0.01"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                    onchange="calculateValues()">
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Gramatura por Folha (g)</label>
+                        <div class="lg:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Gramatura por Folha (g)</label>
                             <input type="number" id="gramatura_folha" name="gramatura_folha" readonly step="0.001"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
-                            <small class="text-gray-500">Calculado automaticamente</small>
+                                   class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
+                            <small class="text-xs text-gray-500">Calculado automaticamente</small>
                         </div>
                         
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Preço por Folha (R$)</label>
+                        <div class="lg:col-span-1">
+                            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Preço por Folha (R$)</label>
                             <input type="number" id="preco_folha" name="preco_folha" readonly step="0.001"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
-                            <small class="text-gray-500">Calculado automaticamente</small>
+                                   class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-sm border border-gray-300 rounded-lg bg-gray-50 text-gray-600">
+                            <small class="text-xs text-gray-500">Calculado automaticamente</small>
                         </div>
                     </div>
                     
-                    <div class="flex justify-end space-x-3 pt-6 border-t">
+                    <div class="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 pt-4 sm:pt-6 border-t mt-4 sm:mt-6">
                         <button type="button" onclick="closeTonerModal()" 
-                                class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors">
+                                class="w-full sm:w-auto px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors text-sm sm:text-base">
                             Cancelar
                         </button>
                         <button type="submit" 
-                                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                                class="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base">
                             Salvar Toner
                         </button>
                     </div>
@@ -207,6 +207,80 @@
 
 #toner-modal {
     backdrop-filter: blur(4px);
+}
+
+/* Modal responsivo adicional */
+@media (max-width: 640px) {
+    #toner-modal .bg-white {
+        margin: 0.5rem;
+        max-height: calc(100vh - 1rem);
+    }
+    
+    #toner-modal h3 {
+        font-size: 1rem;
+    }
+    
+    #toner-modal .grid {
+        gap: 0.75rem;
+    }
+    
+    #toner-modal input, 
+    #toner-modal select {
+        font-size: 14px;
+    }
+    
+    #toner-modal label {
+        font-size: 12px;
+        margin-bottom: 0.25rem;
+    }
+    
+    #toner-modal small {
+        font-size: 10px;
+    }
+}
+
+@media (min-width: 1024px) {
+    #toner-modal .grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 1280px) {
+    #toner-modal .grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+/* Melhor visibilidade dos campos calculados */
+#toner-modal input[readonly] {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Scroll suave no modal */
+#toner-modal .overflow-y-auto {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
+#toner-modal .overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+}
+
+#toner-modal .overflow-y-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+
+#toner-modal .overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+#toner-modal .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
 }
 </style>
 
