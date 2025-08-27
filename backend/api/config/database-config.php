@@ -426,7 +426,7 @@ class Database {
         try {
             $conn = $this->getConnection();
             
-            // Tabela de usuários (para futuras funcionalidades)
+            // Apenas tabela de usuários
             $sql_usuarios = "CREATE TABLE IF NOT EXISTS usuarios (
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 nome VARCHAR(100) NOT NULL,
@@ -442,14 +442,14 @@ class Database {
             $conn->exec($sql_usuarios);
             
             return [
-                \'success\' => true,
-                \'message\' => \'Tabelas criadas com sucesso\'
+                'success' => true,
+                'message' => 'Tabela usuarios criada com sucesso'
             ];
             
         } catch (Exception $e) {
             return [
-                \'success\' => false,
-                \'message\' => $e->getMessage()
+                'success' => false,
+                'message' => $e->getMessage()
             ];
         }
     }
