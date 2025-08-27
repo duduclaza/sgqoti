@@ -1,16 +1,26 @@
 <?php
 require_once '../config/cors.php';
 require_once '../config/database.php';
+require_once '../utils/logger.php';
 
 header('Content-Type: application/json');
 
 // Verificar método da requisição
 $method = $_SERVER['REQUEST_METHOD'];
+Logger::log('users.php request start', [
+    'method' => $method,
+    'query' => $_GET ?? [],
+    'headers' => function_exists('getallheaders') ? (getallheaders() ?: []) : []
+]);
 
 if ($method === 'POST') {
     // Tentar ler dados JSON primeiro
     $raw = file_get_contents("php://input");
     $input = json_decode($raw, true);
+    Logger::log('POST payload received', [
+        'raw_length' => strlen($raw ?? ''),
+        'json_decoded' => is_array($input),
+    ]);
 
     // Se não houver JSON válido, usar $_POST como fallback
     if (!$input && !empty($_POST)) {
@@ -19,6 +29,7 @@ if ($method === 'POST') {
 
     // Se ainda não houver dados, retornar erro
     if (!$input) {
+        Logger::log('POST without input', [], 'WARN');
         http_response_code(400);
         echo json_encode([
             'success' => false,
@@ -28,21 +39,27 @@ if ($method === 'POST') {
     }
     
     $action = $input['action'] ?? '';
+    Logger::log('POST action resolved', [ 'action' => $action, 'keys' => array_keys($input) ]);
     
     switch ($action) {
         case 'create_user':
+            Logger::log('Action create_user called');
             createUser($input);
             break;
         case 'list_users':
+            Logger::log('Action list_users called');
             listUsers();
             break;
         case 'update_user':
+            Logger::log('Action update_user called');
             updateUser($input);
             break;
         case 'delete_user':
+            Logger::log('Action delete_user called');
             deleteUser($input);
             break;
         default:
+            Logger::log('Unknown action', [ 'action' => $action ], 'WARN');
             http_response_code(400);
             echo json_encode([
                 'success' => false,
@@ -52,8 +69,10 @@ if ($method === 'POST') {
     }
 } else if ($method === 'GET') {
     // Listar usuários
+    Logger::log('GET list users');
     listUsers();
 } else {
+    Logger::log('Method not allowed', [ 'method' => $method ], 'WARN');
     http_response_code(405);
     echo json_encode([
         'success' => false,
@@ -67,6 +86,7 @@ function createUser($data) {
         $requiredFields = ['name', 'email', 'username', 'password', 'role', 'status'];
         foreach ($requiredFields as $field) {
             if (empty($data[$field])) {
+                Logger::log('createUser missing field', [ 'field' => $field ], 'WARN');
                 throw new Exception("Campo obrigatório: $field");
             }
         }
@@ -78,6 +98,7 @@ function createUser($data) {
         $stmt = $conn->prepare("SELECT id FROM usuarios WHERE email = ?");
         $stmt->execute([$data['email']]);
         if ($stmt->fetch()) {
+            Logger::log('createUser email exists', [ 'email' => $data['email'] ], 'WARN');
             throw new Exception("Email já cadastrado");
         }
         
@@ -85,6 +106,7 @@ function createUser($data) {
         $stmt = $conn->prepare("SELECT id FROM usuarios WHERE usuario = ?");
         $stmt->execute([$data['username']]);
         if ($stmt->fetch()) {
+            Logger::log('createUser username exists', [ 'username' => $data['username'] ], 'WARN');
             throw new Exception("Nome de usuário já existe");
         }
         
@@ -108,6 +130,7 @@ function createUser($data) {
         
         if ($result) {
             $userId = $conn->lastInsertId();
+            Logger::log('createUser success', [ 'id' => $userId, 'username' => $data['username'] ]);
             
             http_response_code(201);
             echo json_encode([
@@ -124,10 +147,12 @@ function createUser($data) {
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
         } else {
+            Logger::log('createUser DB insert failed', [], 'ERROR');
             throw new Exception("Erro ao inserir usuário no banco de dados");
         }
         
     } catch (Exception $e) {
+        Logger::log('createUser exception', [ 'error' => $e->getMessage() ], 'ERROR');
         http_response_code(500);
         echo json_encode([
             'success' => false,
@@ -149,6 +174,7 @@ function listUsers() {
         ");
         
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        Logger::log('listUsers success', [ 'count' => count($users) ]);
         
         echo json_encode([
             'success' => true,
@@ -159,6 +185,7 @@ function listUsers() {
         ]);
         
     } catch (Exception $e) {
+        Logger::log('listUsers exception', [ 'error' => $e->getMessage() ], 'ERROR');
         http_response_code(500);
         echo json_encode([
             'success' => false,
@@ -171,6 +198,7 @@ function listUsers() {
 function updateUser($data) {
     try {
         if (empty($data['id'])) {
+            Logger::log('updateUser missing id', [], 'WARN');
             throw new Exception("ID do usuário é obrigatório");
         }
         
@@ -212,6 +240,7 @@ function updateUser($data) {
         }
         
         if (empty($fields)) {
+            Logger::log('updateUser no fields to update', [], 'WARN');
             throw new Exception("Nenhum campo para atualizar");
         }
         
@@ -222,16 +251,19 @@ function updateUser($data) {
         $stmt = $conn->prepare($sql);
         
         if ($stmt->execute($values)) {
+            Logger::log('updateUser success', [ 'id' => $data['id'] ]);
             echo json_encode([
                 'success' => true,
                 'message' => 'Usuário atualizado com sucesso',
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
         } else {
+            Logger::log('updateUser execute failed', [ 'id' => $data['id'] ], 'ERROR');
             throw new Exception("Erro ao atualizar usuário");
         }
         
     } catch (Exception $e) {
+        Logger::log('updateUser exception', [ 'error' => $e->getMessage(), 'id' => $data['id'] ?? null ], 'ERROR');
         http_response_code(500);
         echo json_encode([
             'success' => false,
@@ -244,6 +276,7 @@ function updateUser($data) {
 function deleteUser($data) {
     try {
         if (empty($data['id'])) {
+            Logger::log('deleteUser missing id', [], 'WARN');
             throw new Exception("ID do usuário é obrigatório");
         }
         
@@ -253,16 +286,19 @@ function deleteUser($data) {
         $stmt = $conn->prepare("DELETE FROM usuarios WHERE id = ?");
         
         if ($stmt->execute([$data['id']])) {
+            Logger::log('deleteUser success', [ 'id' => $data['id'] ]);
             echo json_encode([
                 'success' => true,
                 'message' => 'Usuário excluído com sucesso',
                 'timestamp' => date('Y-m-d H:i:s')
             ]);
         } else {
+            Logger::log('deleteUser execute failed', [ 'id' => $data['id'] ], 'ERROR');
             throw new Exception("Erro ao excluir usuário");
         }
         
     } catch (Exception $e) {
+        Logger::log('deleteUser exception', [ 'error' => $e->getMessage(), 'id' => $data['id'] ?? null ], 'ERROR');
         http_response_code(500);
         echo json_encode([
             'success' => false,

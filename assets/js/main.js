@@ -64,6 +64,10 @@ class SGQApp {
         
         // Atualizar data/hora a cada minuto
         setInterval(() => this.updateDateTime(), 60000);
+
+        // Tema (Dark/Light)
+        this.initTheme();
+        this.setupThemeToggle();
     }
 
     setupEventListeners() {
@@ -78,6 +82,49 @@ class SGQApp {
 
         // Responsividade mobile
         this.setupMobileMenu();
+    }
+
+    // =========================
+    // Tema (Dark Mode)
+    // =========================
+    initTheme() {
+        try {
+            const saved = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = saved || (prefersDark ? 'dark' : 'light');
+            this.applyTheme(theme);
+        } catch (_) {
+            this.applyTheme('light');
+        }
+    }
+
+    applyTheme(theme) {
+        this.theme = theme;
+        const isDark = theme === 'dark';
+        document.documentElement.classList.toggle('dark', isDark);
+        // Persist
+        try { localStorage.setItem('theme', theme); } catch (_) {}
+        // Atualiza rótulo do botão
+        const iconEl = document.getElementById('theme-toggle-icon');
+        const textEl = document.getElementById('theme-toggle-text');
+        if (iconEl && textEl) {
+            if (isDark) {
+                iconEl.textContent = '☀️';
+                textEl.textContent = 'Modo claro';
+            } else {
+                iconEl.textContent = '🌙';
+                textEl.textContent = 'Modo escuro';
+            }
+        }
+    }
+
+    setupThemeToggle() {
+        const btn = document.getElementById('theme-toggle');
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+            const next = (this.theme === 'dark') ? 'light' : 'dark';
+            this.applyTheme(next);
+        });
     }
 
     setupMobileMenu() {
