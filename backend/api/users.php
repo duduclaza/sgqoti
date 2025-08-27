@@ -8,9 +8,16 @@ header('Content-Type: application/json');
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
-    // Ler dados JSON da requisição
-    $input = json_decode(file_get_contents('php://input'), true);
-    
+    // Tentar ler dados JSON primeiro
+    $raw = file_get_contents("php://input");
+    $input = json_decode($raw, true);
+
+    // Se não houver JSON válido, usar $_POST como fallback
+    if (!$input && !empty($_POST)) {
+        $input = $_POST;
+    }
+
+    // Se ainda não houver dados, retornar erro
     if (!$input) {
         http_response_code(400);
         echo json_encode([
