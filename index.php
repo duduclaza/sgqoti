@@ -497,12 +497,12 @@ $module = $_GET['module'] ?? 'dashboard';
     .sap-login-layout {
       display: flex;
       background: rgba(30, 41, 59, 0.95);
-      border-radius: 24px;
+      border-radius: 16px;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
       overflow: hidden;
       width: 100%;
-      max-width: 900px;
-      min-height: 500px;
+      max-width: 1000px;
+      height: 600px;
       backdrop-filter: blur(10px);
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
@@ -514,7 +514,7 @@ $module = $_GET['module'] ?? 'dashboard';
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 60px 40px;
+      padding: 40px;
       position: relative;
     }
     
@@ -530,26 +530,30 @@ $module = $_GET['module'] ?? 'dashboard';
     }
     
     .sap-login-logo {
-      max-width: 200px;
-      margin-bottom: 30px;
+      max-width: 180px;
+      max-height: 80px;
+      margin-bottom: 20px;
       filter: brightness(0) invert(1);
       z-index: 1;
+      object-fit: contain;
     }
     
     .sap-login-brand {
       text-align: center;
       color: white;
       z-index: 1;
+      margin-top: 10px;
     }
     
     .sap-login-brand h1 {
-      font-size: 36px;
+      font-size: 42px;
       font-weight: 700;
-      margin: 0 0 8px 0;
+      margin: 0 0 12px 0;
       background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+      letter-spacing: 2px;
     }
     
     .sap-login-brand p {
