@@ -703,7 +703,11 @@ class SGQApp {
         this.addToLog('🔄 Enviando dados: ' + JSON.stringify(formData), 'info');
         
         try {
-            const response = await fetch('backend/api/users.php', {
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'backend/api/users.php' 
+                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
+                
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -779,7 +783,11 @@ class SGQApp {
 
     async loadExistingUsers() {
         try {
-            const response = await fetch('backend/api/users.php', {
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'backend/api/users.php' 
+                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
+                
+            const response = await fetch(apiUrl, {
                 method: 'GET'
             });
             
@@ -811,7 +819,11 @@ class SGQApp {
 
     async checkConnectionStatus() {
         try {
-            const response = await fetch('backend/api/config/database-config.php');
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'backend/api/config/database-config.php' 
+                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/config/database-config.php';
+                
+            const response = await fetch(apiUrl);
             const result = await response.json();
             
             const statusElement = document.getElementById('connection-status');
@@ -846,7 +858,11 @@ class SGQApp {
 
     async loadConfigFromBackend() {
         try {
-            const response = await fetch('backend/api/config/database-config.php');
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'backend/api/config/database-config.php' 
+                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/config/database-config.php';
+                
+            const response = await fetch(apiUrl);
             const result = await response.json();
             
             if (result.success && result.data) {
@@ -908,14 +924,17 @@ class SGQApp {
 
     async syncTables() {
         this.addToLog('Sincronizando tabelas do banco de dados...', 'info');
-        
         const button = document.getElementById('sync-tables-btn');
         const originalText = button.innerHTML;
         button.innerHTML = '<div class="w-4 h-4 animate-spin rounded-full border-2 border-white border-t-transparent"></div> Sincronizando...';
         button.disabled = true;
         
         try {
-            const response = await fetch('backend/api/config/database-config.php', {
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'backend/api/config/database-config.php' 
+                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/config/database-config.php';
+                
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
