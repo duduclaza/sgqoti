@@ -364,7 +364,7 @@ class SGQApp {
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Host</label>
-                                <input type="text" id="db-host" value="localhost" class="form-input" readonly>
+                                <input type="text" id="db-host" value="212.85.3.19" class="form-input" readonly>
                             </div>
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Porta</label>

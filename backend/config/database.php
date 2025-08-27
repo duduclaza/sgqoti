@@ -5,7 +5,7 @@
  */
 
 class Database {
-    private $host = 'localhost';
+    private $host = "212.85.3.19";
     private $db_name = 'u230868210_sgqoti';
     private $username = 'u230868210_dusouza';
     private $password = 'Pandora@1989';
