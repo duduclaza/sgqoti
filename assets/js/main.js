@@ -899,7 +899,11 @@ class SGQApp {
         button.disabled = true;
         
         try {
-            const response = await fetch('backend/api/config/database-config.php', {
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'backend/api/config/database-config.php' 
+                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/config/database-config.php';
+                
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -996,12 +1000,16 @@ class SGQApp {
         button.disabled = true;
         
         try {
-            const response = await fetch('backend/api/config/database-config.php', {
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'backend/api/config/database-config.php' 
+                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/config/database-config.php';
+                
+            const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ action: 'system_check' })
+                body: JSON.stringify({ action: 'check_system' })
             });
             
             const result = await response.json();

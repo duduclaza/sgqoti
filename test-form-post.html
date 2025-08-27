@@ -20,7 +20,7 @@
 <body>
     <h2>Teste da API Users.php - Formato Form POST</h2>
     
-    <form id="userForm" action="backend/api/users.php" method="POST">
+    <form id="userForm" method="POST">
         <div class="form-group">
             <label for="action">Ação:</label>
             <select id="action" name="action" required>
@@ -81,8 +81,12 @@
             
             const formData = new FormData(this);
             
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'backend/api/users.php' 
+                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
+            
             try {
-                const response = await fetch('backend/api/users.php', {
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     body: formData
                 });
@@ -107,8 +111,12 @@
                 status: 'active'
             };
             
+            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                ? 'backend/api/users.php' 
+                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
+                
             try {
-                const response = await fetch('backend/api/users.php', {
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
