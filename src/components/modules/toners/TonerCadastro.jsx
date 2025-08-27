@@ -24,7 +24,13 @@ const TonerCadastro = () => {
       // Fallback para localStorage se API falhar
       const savedToners = localStorage.getItem('sgq-toners');
       if (savedToners) {
-        setToners(JSON.parse(savedToners));
+        try {
+          setToners(JSON.parse(savedToners));
+        } catch (parseError) {
+          console.error('Erro ao carregar toners do localStorage:', parseError);
+          localStorage.removeItem('sgq-toners'); // Remove o valor inválido
+          setToners([]);
+        }
       }
     }
   };

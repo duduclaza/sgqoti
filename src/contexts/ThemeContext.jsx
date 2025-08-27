@@ -13,7 +13,15 @@ export const useTheme = () => {
 export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('sgq-theme');
-    return saved ? JSON.parse(saved) : false;
+    if (!saved) return false;
+    
+    try {
+      return JSON.parse(saved);
+    } catch (error) {
+      console.error('Erro ao carregar tema:', error);
+      localStorage.removeItem('sgq-theme'); // Remove o valor inválido
+      return false;
+    }
   });
 
   useEffect(() => {

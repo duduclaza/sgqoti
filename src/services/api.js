@@ -1,5 +1,5 @@
 // API Configuration and Service
-const API_BASE_URL = 'http://localhost/SGQ/backend/api';
+const API_BASE_URL = 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api';
 
 class ApiService {
   constructor() {
