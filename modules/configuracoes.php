@@ -780,16 +780,28 @@ function saveLogoSettings() {
     },
     body: JSON.stringify(settings)
   })
-  .then(response => response.json())
-  .then(result => {
-    if (result.success) {
-      alert('Configurações salvas com sucesso!');
-      location.reload();
-    } else {
-      alert('Erro ao salvar: ' + result.message);
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Erro na requisição: ' + response.status);
+    }
+    return response.text();
+  })
+  .then(text => {
+    try {
+      const result = JSON.parse(text);
+      if (result.success) {
+        alert('Configurações salvas com sucesso!');
+        location.reload();
+      } else {
+        alert('Erro ao salvar: ' + result.message);
+      }
+    } catch (e) {
+      console.error('Resposta não é JSON válido:', text);
+      alert('Erro: Resposta inválida do servidor');
     }
   })
   .catch(error => {
+    console.error('Erro na requisição:', error);
     alert('Erro: ' + error.message);
   });
 }
