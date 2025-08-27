@@ -702,11 +702,14 @@ class SGQApp {
         console.log('Dados enviados:', formData);
         this.addToLog('🔄 Enviando dados: ' + JSON.stringify(formData), 'info');
         
+        const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+            ? 'backend/api/users.php' 
+            : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
+            
+        console.log('URL da API:', apiUrl);
+        this.addToLog('🌐 URL da API: ' + apiUrl, 'info');
+        
         try {
-            const apiUrl = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                ? 'backend/api/users.php' 
-                : 'https://lightseagreen-cobra-261680.hostingersite.com/backend/api/users.php';
-                
             const response = await fetch(apiUrl, {
                 method: 'POST',
                 headers: {
