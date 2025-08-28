@@ -137,6 +137,12 @@ $module = $_GET['module'] ?? 'dashboard';
       overflow-y: auto;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
       backdrop-filter: blur(16px);
+      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; /* IE and Edge */
+    }
+    
+    .sap-sidebar::-webkit-scrollbar {
+      display: none; /* Chrome, Safari and Opera */
     }
     
     .sap-sidebar-header {
@@ -276,9 +282,22 @@ $module = $_GET['module'] ?? 'dashboard';
       transform: scale(1.15) rotate(5deg);
     }
     
-    .sap-nav-link.active .sap-nav-icon {
-      transform: scale(1.1);
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    .sap-nav-link.active .sap-logo {
+      max-width: 120px;
+      height: auto;
+      filter: brightness(1.1) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
+    }
+    
+    .sap-logo-fallback {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      letter-spacing: 0.1em;
+      background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
     
     /* Main Content Area */
@@ -1021,7 +1040,8 @@ $module = $_GET['module'] ?? 'dashboard';
     <aside class="sap-sidebar">
       <div class="sap-sidebar-header">
         <div class="sap-logo-container">
-          <img src="assets/images/logo.png" alt="SGQ OTI" class="sap-logo">
+          <img id="sidebar-logo" src="backend/api/logos.php?tipo=sidebar&download=1" alt="SGQ OTI" class="sap-logo" style="display: none;">
+          <div id="logo-fallback" class="sap-logo-fallback">SGQ</div>
         </div>
         <p class="sap-sidebar-subtitle">Sistema de Gestão da Qualidade</p>
       </div>
@@ -1030,52 +1050,52 @@ $module = $_GET['module'] ?? 'dashboard';
         <ul class="sap-nav">
           <li class="sap-nav-item">
             <a href="?module=dashboard" class="sap-nav-link <?= $module == 'dashboard' ? 'active' : '' ?>">
-              <span class="sap-nav-icon">📊</span>Dashboard
+              <span class="sap-nav-icon">●</span>Dashboard
             </a>
           </li>
           <li class="sap-nav-item">
             <a href="?module=toners" class="sap-nav-link <?= $module == 'toners' ? 'active' : '' ?>">
-              <span class="sap-nav-icon">🖨️</span>Controle de Toners
+              <span class="sap-nav-icon">●</span>Controle de Toners
             </a>
           </li>
           <li class="sap-nav-item">
             <a href="?module=homologacoes" class="sap-nav-link <?= $module == 'homologacoes' ? 'active' : '' ?>">
-              <span class="sap-nav-icon">✅</span>Homologações
+              <span class="sap-nav-icon">●</span>Homologações
             </a>
           </li>
           <li class="sap-nav-item">
             <a href="?module=amostragens" class="sap-nav-link <?= $module == 'amostragens' ? 'active' : '' ?>">
-              <span class="sap-nav-icon">🧪</span>Amostragens
+              <span class="sap-nav-icon">●</span>Amostragens
             </a>
           </li>
           <li class="sap-nav-item">
             <a href="?module=garantias" class="sap-nav-link <?= $module == 'garantias' ? 'active' : '' ?>">
-              <span class="sap-nav-icon">🛡️</span>Garantias
+              <span class="sap-nav-icon">●</span>Garantias
             </a>
           </li>
           <li class="sap-nav-item">
             <a href="?module=pops-its" class="sap-nav-link <?= $module == 'pops-its' ? 'active' : '' ?>">
-              <span class="sap-nav-icon">📋</span>POPs e ITs
+              <span class="sap-nav-icon">●</span>POPs e ITs
             </a>
           </li>
           <li class="sap-nav-item">
             <a href="?module=fluxogramas" class="sap-nav-link <?= $module == 'fluxogramas' ? 'active' : '' ?>">
-              <span class="sap-nav-icon">📊</span>Fluxogramas
+              <span class="sap-nav-icon">●</span>Fluxogramas
             </a>
           </li>
           <li class="sap-nav-item">
             <a href="?module=auditorias" class="sap-nav-link <?= $module == 'auditorias' ? 'active' : '' ?>">
-              <span class="sap-nav-icon">🔍</span>Auditorias
+              <span class="sap-nav-icon">●</span>Auditorias
             </a>
           </li>
           <li class="sap-nav-item">
             <a href="?module=dinamicas" class="sap-nav-link <?= $module == 'dinamicas' ? 'active' : '' ?>">
-              <span class="sap-nav-icon">⚡</span>Dinâmicas
+              <span class="sap-nav-icon">●</span>Dinâmicas
             </a>
           </li>
           <li class="sap-nav-item">
             <a href="?module=configuracoes" class="sap-nav-link <?= $module == 'configuracoes' ? 'active' : '' ?>">
-              <span class="sap-nav-icon">⚙️</span>Configurações
+              <span class="sap-nav-icon">●</span>Configurações
             </a>
           </li>
         </ul>
@@ -1306,5 +1326,24 @@ $module = $_GET['module'] ?? 'dashboard';
   </script>
 
   <?php endif; ?>
-</body>
+  <script>
+    // Verificar se logo existe e mostrar fallback se necessário
+    document.addEventListener('DOMContentLoaded', function() {
+      const logoImg = document.getElementById('sidebar-logo');
+      const logoFallback = document.getElementById('logo-fallback');
+      
+      if (logoImg) {
+        logoImg.onload = function() {
+          logoImg.style.display = 'block';
+          if (logoFallback) logoFallback.style.display = 'none';
+        };
+        
+        logoImg.onerror = function() {
+          logoImg.style.display = 'none';
+          if (logoFallback) logoFallback.style.display = 'block';
+        };
+      }
+    });
+  </script>
+  </body>
 </html>

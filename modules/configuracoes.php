@@ -32,24 +32,62 @@ $aba = $_GET['aba'] ?? 'sistema';
         <!-- Aba Sistema -->
         <div class="sap-card">
           <div class="sap-card-header">
-            <h3 class="sap-card-title">Configurações do Sistema</h3>
+            <h3>Gerenciar Logos</h3>
           </div>
           <div class="sap-card-content">
-            <div class="sap-form">
-              <div class="sap-form-group">
-                <label class="sap-label">Nome do Sistema</label>
-                <input type="text" class="sap-input" value="SGQ OTI" readonly>
-              </div>
-              <div class="sap-form-group">
-                <label class="sap-label">Versão</label>
-                <input type="text" class="sap-input" value="1.0.0" readonly>
-              </div>
-              <div class="sap-form-group">
-                <label class="sap-label">Status da Conexão</label>
-                <div class="sap-status-indicator">
-                  <span class="sap-status-dot active"></span>
-                  <span>Conectado</span>
+            <div class="logo-upload-section">
+              <h4>Upload de Logo do Sidebar</h4>
+              <form id="logo-sidebar-form" enctype="multipart/form-data" class="logo-form">
+                <input type="hidden" name="tipo" value="sidebar">
+                <input type="hidden" name="nome" value="Logo Sidebar">
+                <div class="sap-form-group">
+                  <label class="sap-label">Selecionar Imagem (PNG, JPG, SVG - máx 5MB)</label>
+                  <input type="file" name="logo" accept="image/*" class="sap-input" required>
                 </div>
+                <button type="submit" class="modern-btn modern-btn-primary">
+                  <span>📤</span> Enviar Logo Sidebar
+                </button>
+              </form>
+            </div>
+            
+            <div class="logo-upload-section" style="margin-top: 2rem;">
+              <h4>Upload de Logo do Header</h4>
+              <form id="logo-header-form" enctype="multipart/form-data" class="logo-form">
+                <input type="hidden" name="tipo" value="header">
+                <input type="hidden" name="nome" value="Logo Header">
+                <div class="sap-form-group">
+                  <label class="sap-label">Selecionar Imagem (PNG, JPG, SVG - máx 5MB)</label>
+                  <input type="file" name="logo" accept="image/*" class="sap-input" required>
+                </div>
+                <button type="submit" class="modern-btn modern-btn-green">
+                  <span>📤</span> Enviar Logo Header
+                </button>
+              </form>
+            </div>
+            
+            <div class="logos-preview" style="margin-top: 2rem;">
+              <h4>Logos Atuais</h4>
+              <div id="logos-list" class="logos-grid">
+                <!-- Logos serão carregados aqui -->
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="sap-card" style="margin-top: 2rem;">
+          <div class="sap-card-header">
+            <h3>Configurações do Sistema</h3>
+          </div>
+          <div class="sap-card-content">
+            <div class="sap-form-group">
+              <label class="sap-label">Versão do Sistema</label>
+              <input type="text" class="sap-input" value="1.0.0" readonly>
+            </div>
+            <div class="sap-form-group">
+              <label class="sap-label">Status da Conexão</label>
+              <div class="sap-status-indicator">
+                <span class="sap-status-dot active"></span>
+                <span>Conectado</span>
               </div>
             </div>
           </div>
@@ -989,4 +1027,161 @@ document.getElementById('addUserForm').addEventListener('submit', function(e) {
     alert('Erro ao criar usuário: ' + error.message);
   });
 });
+
+// Sistema de upload de logos
+document.addEventListener('DOMContentLoaded', function() {
+  // Upload de logo sidebar
+  const sidebarForm = document.getElementById('logo-sidebar-form');
+  if (sidebarForm) {
+    sidebarForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      uploadLogo(this, 'sidebar');
+    });
+  }
+  
+  // Upload de logo header
+  const headerForm = document.getElementById('logo-header-form');
+  if (headerForm) {
+    headerForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      uploadLogo(this, 'header');
+    });
+  }
+  
+  // Carregar logos existentes
+  if (document.getElementById('logos-list')) {
+    loadLogos();
+  }
+});
+
+function uploadLogo(form, tipo) {
+  const formData = new FormData(form);
+  const button = form.querySelector('button[type="submit"]');
+  const originalText = button.innerHTML;
+  
+  button.innerHTML = '<span>⏳</span> Enviando...';
+  button.disabled = true;
+  
+  fetch('backend/api/logos.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      alert('Logo enviado com sucesso!');
+      form.reset();
+      loadLogos();
+      
+      // Atualizar logo no sidebar se for do tipo sidebar
+      if (tipo === 'sidebar') {
+        const sidebarLogo = document.getElementById('sidebar-logo');
+        const logoFallback = document.getElementById('logo-fallback');
+        if (sidebarLogo) {
+          sidebarLogo.src = data.url + '&t=' + Date.now();
+          sidebarLogo.style.display = 'block';
+          if (logoFallback) logoFallback.style.display = 'none';
+        }
+      }
+    } else {
+      alert('Erro: ' + data.error);
+    }
+  })
+  .catch(error => {
+    console.error('Erro:', error);
+    alert('Erro ao enviar logo');
+  })
+  .finally(() => {
+    button.innerHTML = originalText;
+    button.disabled = false;
+  });
+}
+
+function loadLogos() {
+  fetch('backend/api/logos.php')
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const logosList = document.getElementById('logos-list');
+      if (logosList) {
+        logosList.innerHTML = '';
+        
+        data.logos.forEach(logo => {
+          const logoDiv = document.createElement('div');
+          logoDiv.className = 'logo-item';
+          logoDiv.innerHTML = `
+            <div class="logo-preview">
+              <img src="${logo.url}" alt="${logo.nome}" style="max-width: 100px; max-height: 60px;">
+            </div>
+            <div class="logo-info">
+              <strong>${logo.nome}</strong><br>
+              <small>Tipo: ${logo.tipo}</small><br>
+              <small>Tamanho: ${(logo.tamanho / 1024).toFixed(1)} KB</small>
+            </div>
+            <button onclick="deleteLogo(${logo.id})" class="modern-btn" style="background: #ef4444; padding: 0.5rem;">
+              🗑️
+            </button>
+          `;
+          logosList.appendChild(logoDiv);
+        });
+      }
+    }
+  })
+  .catch(error => console.error('Erro ao carregar logos:', error));
+}
+
+function deleteLogo(id) {
+  if (confirm('Tem certeza que deseja remover este logo?')) {
+    fetch(`backend/api/logos.php?id=${id}`, {
+      method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Logo removido com sucesso!');
+        loadLogos();
+      } else {
+        alert('Erro: ' + data.error);
+      }
+    })
+    .catch(error => {
+      console.error('Erro:', error);
+      alert('Erro ao remover logo');
+    });
+  }
+}
 </script>
+
+<style>
+.logo-upload-section {
+  border: 2px dashed #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.logos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.logo-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: white;
+}
+
+.logo-preview {
+  flex-shrink: 0;
+}
+
+.logo-info {
+  flex-grow: 1;
+}
+</style>
