@@ -123,28 +123,42 @@ $module = $_GET['module'] ?? 'dashboard';
       min-height: 100vh;
     }
     
-    /* Sidebar SAP Style - Dark Theme */
+    /* Modern Sidebar */
     .sap-sidebar {
       position: fixed;
       left: 0;
       top: 0;
       width: 280px;
       height: 100vh;
-      background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
-      border-right: 1px solid #404040;
+      background: linear-gradient(145deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+      border-right: 1px solid rgba(148, 163, 184, 0.1);
       padding: 0;
       z-index: 100;
       overflow-y: auto;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      backdrop-filter: blur(16px);
     }
     
     .sap-sidebar-header {
-      padding: 24px 20px;
-      background: linear-gradient(135deg, #0070f2 0%, #0040a0 100%);
+      padding: 32px 24px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
       color: white;
-      border-bottom: 1px solid #005bb5;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
       text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .sap-sidebar-header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="8" height="8" patternUnits="userSpaceOnUse"><path d="M 8 0 L 0 0 0 8" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+      opacity: 0.6;
     }
     
     .sap-logo-container {
@@ -157,38 +171,44 @@ $module = $_GET['module'] ?? 'dashboard';
       width: auto;
       height: auto;
       filter: brightness(0) invert(1);
+      position: relative;
+      z-index: 1;
     }
     
     .sap-sidebar-subtitle {
-      font-size: 12px;
-      opacity: 0.9;
-      margin: 4px 0 0 0;
+      font-size: 13px;
+      opacity: 0.95;
+      margin: 8px 0 0 0;
+      font-weight: 500;
+      position: relative;
+      z-index: 1;
     }
     
     .sap-nav {
-      padding: 8px 0;
+      padding: 16px 0;
       margin: 0;
       list-style: none;
     }
     
     .sap-nav-item {
-      margin: 2px 8px;
-      border-radius: 8px;
+      margin: 4px 16px;
+      border-radius: 12px;
       overflow: hidden;
     }
     
     .sap-nav-link {
       display: flex;
       align-items: center;
-      padding: 14px 16px;
-      color: #e0e0e0;
+      padding: 16px 20px;
+      color: rgba(226, 232, 240, 0.8);
       text-decoration: none;
       font-size: 14px;
       font-weight: 500;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      border-radius: 8px;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 12px;
       position: relative;
       overflow: hidden;
+      backdrop-filter: blur(8px);
     }
     
     .sap-nav-link::before {
@@ -198,27 +218,45 @@ $module = $_GET['module'] ?? 'dashboard';
       top: 0;
       width: 0;
       height: 100%;
-      background: linear-gradient(90deg, #0070f2, #00a0ff);
-      transition: width 0.3s ease;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: -1;
+      border-radius: 12px;
+    }
+    
+    .sap-nav-link::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: -1;
+      border-radius: 12px;
     }
     
     .sap-nav-link:hover {
-      background: rgba(255,255,255,0.1);
       color: #ffffff;
-      transform: translateX(4px);
-      box-shadow: 0 4px 12px rgba(0,112,242,0.3);
+      transform: translateX(6px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(99, 102, 241, 0.4);
     }
     
     .sap-nav-link:hover::before {
       width: 4px;
     }
     
+    .sap-nav-link:hover::after {
+      opacity: 1;
+    }
+    
     .sap-nav-link.active {
-      background: linear-gradient(90deg, #0070f2, #00a0ff);
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
       color: white;
-      transform: translateX(4px);
-      box-shadow: 0 4px 16px rgba(0,112,242,0.4);
+      transform: translateX(6px) scale(1.02);
+      box-shadow: 0 12px 30px rgba(99, 102, 241, 0.5);
     }
     
     .sap-nav-link.active::before {
@@ -226,15 +264,21 @@ $module = $_GET['module'] ?? 'dashboard';
     }
     
     .sap-nav-icon {
-      margin-right: 12px;
-      font-size: 18px;
-      width: 24px;
+      margin-right: 14px;
+      font-size: 20px;
+      width: 28px;
       text-align: center;
-      transition: transform 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
     
     .sap-nav-link:hover .sap-nav-icon {
+      transform: scale(1.15) rotate(5deg);
+    }
+    
+    .sap-nav-link.active .sap-nav-icon {
       transform: scale(1.1);
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
     }
     
     /* Main Content Area */
@@ -314,132 +358,230 @@ $module = $_GET['module'] ?? 'dashboard';
       padding: 32px;
     }
     
-    /* Cards SAP Style */
+    /* Modern Cards */
     .sap-card {
       background: white;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      border: 1px solid #e5e5e5;
-      margin-bottom: 24px;
+      border-radius: 20px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(226, 232, 240, 0.5);
+      margin-bottom: 32px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .sap-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
+    }
+    
+    .sap-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
     
     .sap-card-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid #f0f0f0;
+      padding: 28px 32px 20px;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.3);
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.02) 0%, rgba(139, 92, 246, 0.02) 100%);
     }
     
     .sap-card-title {
-      font-size: 18px;
-      font-weight: 600;
-      color: #32363a;
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
       margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
     
     .sap-card-content {
-      padding: 24px;
+      padding: 32px;
     }
     
-    /* Forms SAP Style */
+    /* Modern Forms */
     .sap-form {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
     }
     
     .sap-form-group {
       display: flex;
       flex-direction: column;
+      position: relative;
     }
     
     .sap-label {
       font-size: 14px;
-      font-weight: 500;
-      color: #32363a;
-      margin-bottom: 6px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
     
     .sap-input {
-      padding: 12px 16px;
-      border: 1px solid #d9d9d9;
-      border-radius: 4px;
+      padding: 16px 20px;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
       font-size: 14px;
       background: white;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
     }
     
     .sap-input:focus {
       outline: none;
-      border-color: #0070f2;
-      box-shadow: 0 0 0 2px rgba(0,112,242,0.1);
+      border-color: #6366f1;
+      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .sap-input:hover {
+      border-color: #d1d5db;
+      transform: translateY(-1px);
     }
     
     .sap-button {
-      padding: 12px 24px;
-      background: #0070f2;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 12px;
       font-size: 14px;
-      font-weight: 500;
+      font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .sap-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
     }
     
     .sap-button:hover {
-      background: #0040a0;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+    }
+    
+    .sap-button:hover::before {
+      left: 100%;
+    }
+    
+    .sap-button:active {
+      transform: translateY(0);
     }
     
     .sap-button-secondary {
-      background: #f0f0f0;
-      color: #32363a;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      color: #475569;
+      border: 2px solid #e2e8f0;
     }
     
     .sap-button-secondary:hover {
-      background: #e0e0e0;
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(71, 85, 105, 0.2);
     }
     
     .sap-button-danger {
-      background: #d32f2f;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
     }
     
     .sap-button-danger:hover {
-      background: #b71c1c;
+      background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
     }
     
     .sap-button-warning {
-      background: #ff9800;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
     }
     
     .sap-button-warning:hover {
-      background: #f57c00;
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
     }
     
-    /* Tables SAP Style */
+    /* Modern Tables */
     .sap-table {
       width: 100%;
-      border-collapse: collapse;
+      border-collapse: separate;
+      border-spacing: 0;
       background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     }
     
     .sap-table th {
-      background: #f8f9fa;
-      padding: 16px;
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      padding: 20px 24px;
       text-align: left;
       font-weight: 600;
-      color: #32363a;
-      border-bottom: 2px solid #e5e5e5;
+      color: white;
+      border: none;
       font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+    }
+    
+    .sap-table th:first-child {
+      border-top-left-radius: 16px;
+    }
+    
+    .sap-table th:last-child {
+      border-top-right-radius: 16px;
     }
     
     .sap-table td {
-      padding: 16px;
-      border-bottom: 1px solid #f0f0f0;
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.5);
       font-size: 14px;
-      color: #32363a;
+      color: #475569;
+      transition: all 0.2s ease;
+      position: relative;
     }
     
-    .sap-table tr:hover {
-      background-color: #f8f9fa;
+    .sap-table tbody tr {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .sap-table tbody tr:hover {
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+      transform: scale(1.01);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+    }
+    
+    .sap-table tbody tr:last-child td:first-child {
+      border-bottom-left-radius: 16px;
+    }
+    
+    .sap-table tbody tr:last-child td:last-child {
+      border-bottom-right-radius: 16px;
+    }
+    
+    .sap-table tbody tr:last-child td {
+      border-bottom: none;
     }
     
     /* Dashboard Cards */
@@ -694,6 +836,102 @@ $module = $_GET['module'] ?? 'dashboard';
       border: 1px solid #ffcdd2;
     }
     
+    /* Modern Button Components */
+    .modern-btn {
+      display: inline-flex;
+      items-center: center;
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modern-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .modern-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modern-btn:hover::before {
+      left: 100%;
+    }
+    
+    .modern-btn-primary {
+      background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      color: white;
+    }
+    
+    .modern-btn-primary:hover {
+      box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+    }
+    
+    .modern-btn-green {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+    }
+    
+    .modern-btn-green:hover {
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+    }
+    
+    .modern-btn-purple {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+      color: white;
+    }
+    
+    .modern-btn-purple:hover {
+      box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+    }
+    
+    /* Modern Badges */
+    .modern-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .modern-badge-black {
+      background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+      color: white;
+    }
+    
+    .modern-badge-cyan {
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+      color: white;
+    }
+    
+    .modern-badge-magenta {
+      background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+      color: white;
+    }
+    
+    .modern-badge-yellow {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+    }
+    
     /* Responsive */
     @media (max-width: 768px) {
       .sap-sidebar {
@@ -711,6 +949,11 @@ $module = $_GET['module'] ?? 'dashboard';
       
       .sap-form {
         grid-template-columns: 1fr;
+      }
+      
+      .modern-btn {
+        padding: 10px 20px;
+        font-size: 13px;
       }
     }
   </style>

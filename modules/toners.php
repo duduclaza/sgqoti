@@ -129,21 +129,30 @@
 
     <!-- Conteúdo das Abas -->
     <div id="content-cadastro" class="tab-content">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg font-semibold text-gray-800">Cadastro de Toners</h3>
-                <div class="flex space-x-3">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 relative overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
+            <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center mb-8 gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-print text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-gray-900">Cadastro de Toners</h3>
+                        <p class="text-gray-600 text-sm">Gerencie seu estoque de toners</p>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-3">
                     <button onclick="openExportModal()" 
-                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                        <i class="fas fa-download mr-2"></i>Exportar
+                            class="modern-btn modern-btn-purple group">
+                        <i class="fas fa-download mr-2 group-hover:animate-bounce"></i>Exportar
                     </button>
                     <button onclick="openImportModal()" 
-                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                        <i class="fas fa-file-excel mr-2"></i>Importar Planilha
+                            class="modern-btn modern-btn-green group">
+                        <i class="fas fa-file-excel mr-2 group-hover:animate-pulse"></i>Importar Planilha
                     </button>
                     <button onclick="openTonerModal()" 
-                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                        <i class="fas fa-plus mr-2"></i>Novo Toner
+                            class="modern-btn modern-btn-primary group">
+                        <i class="fas fa-plus mr-2 group-hover:rotate-90 transition-transform"></i>Novo Toner
                     </button>
                 </div>
             </div>
