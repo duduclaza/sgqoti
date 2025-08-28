@@ -830,6 +830,11 @@ $module = $_GET['module'] ?? 'dashboard';
               <span class="sap-nav-icon">⚡</span>Dinâmicas
             </a>
           </li>
+          <li class="sap-nav-item">
+            <a href="?module=configuracoes" class="sap-nav-link <?= $module == 'configuracoes' ? 'active' : '' ?>">
+              <span class="sap-nav-icon">⚙️</span>Configurações
+            </a>
+          </li>
         </ul>
       </nav>
     </aside>

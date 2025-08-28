@@ -17,10 +17,6 @@
                         class="tab-button py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">
                     Registro de Retornados
                 </button>
-                <button onclick="switchTab('filiais')" id="tab-filiais" 
-                        class="tab-button py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">
-                    Cadastro de Filiais
-                </button>
             </nav>
         </div>
     </div>
@@ -125,38 +121,6 @@
                         </button>
                     </div>
                 </form>
-            </div>
-        </div>
-    </div>
-    
-    <div id="content-filiais" class="tab-content hidden">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-gray-800">Cadastro de Filiais</h3>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Filial</label>
-                    <input id="branch-name" type="text" class="w-full px-3 py-2 border rounded-lg" placeholder="Ex.: Matriz" />
-                </div>
-                <div class="flex items-end">
-                    <button onclick="saveBranch()" class="w-full md:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
-                        <i class="fas fa-save mr-2"></i><span id="branch-submit-text">Adicionar</span>
-                    </button>
-                </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="branches-tbody" class="bg-white divide-y divide-gray-200">
-                        <!-- Carregado via JS (renderBranchesGrid) -->
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
