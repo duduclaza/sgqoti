@@ -775,8 +775,8 @@ function handleLogoUpload(input, type) {
   const file = input.files[0];
   if (!file) return;
   
-  if (file.size > 2 * 1024 * 1024) {
-    alert('Arquivo muito grande! Máximo 2MB.');
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Arquivo muito grande! Máximo 5MB.');
     return;
   }
   
@@ -792,16 +792,19 @@ function handleLogoUpload(input, type) {
     }
     
     // Update preview sections
-    if (type === 'menu') {
+    if (type === 'menu' || type === 'sidebar') {
       const menuLogo = document.getElementById('preview-menu-logo');
       if (menuLogo) menuLogo.src = imgSrc;
-    } else if (type === 'login') {
+    } else if (type === 'login' || type === 'header') {
       const loginLogo = document.getElementById('preview-login-logo');
       if (loginLogo) loginLogo.src = imgSrc;
     }
     
+    // Mapear tipos internos para tipos da API
+    const apiType = (type === 'menu') ? 'sidebar' : (type === 'login' ? 'header' : type);
+    
     // Upload to server
-    uploadLogoToServer(file, type);
+    uploadLogoToServer(file, apiType);
   };
   reader.readAsDataURL(file);
 }
@@ -811,6 +814,14 @@ function uploadLogoToServer(file, type) {
   formData.append('logo', file);
   formData.append('tipo', type);
   formData.append('nome', 'Logo ' + type.charAt(0).toUpperCase() + type.slice(1));
+  
+  // Mostrar indicador de carregamento se houver um botão relacionado
+  const button = document.querySelector(`button[data-logo-type="${type}"]`);
+  const originalText = button ? button.innerHTML : null;
+  if (button) {
+    button.innerHTML = '<span>⏳</span> Enviando...';
+    button.disabled = true;
+  }
   
   fetch('backend/api/logos.php', {
     method: 'POST',
@@ -860,20 +871,31 @@ function uploadLogoToServer(file, type) {
       
       // Atualizar preview com URL do servidor
       const timestamp = new Date().getTime();
-      const previewImg = document.getElementById(type + '-logo-preview');
-      if (previewImg) {
-        previewImg.src = result.url + '&t=' + timestamp;
-      }
       
-      // Atualizar preview sections
-      if (type === 'menu') {
-        const menuLogo = document.getElementById('preview-menu-logo');
-        if (menuLogo) menuLogo.src = result.url + '&t=' + timestamp;
-      } else if (type === 'login') {
-        const loginLogo = document.getElementById('preview-login-logo');
-        if (loginLogo) loginLogo.src = result.url + '&t=' + timestamp;
-      }
+      // Mapear tipos da API para tipos internos
+      const internalTypes = [];
+      if (type === 'sidebar') internalTypes.push('menu', 'sidebar');
+      else if (type === 'header') internalTypes.push('login', 'header');
+      else internalTypes.push(type);
       
+      // Atualizar todos os previews relevantes
+      internalTypes.forEach(internalType => {
+        // Atualizar preview da imagem
+        const previewImg = document.getElementById(internalType + '-logo-preview');
+        if (previewImg) {
+          previewImg.src = result.url + '&t=' + timestamp;
+          previewImg.style.display = 'block';
+        }
+        
+        // Atualizar preview sections
+        if (internalType === 'menu' || internalType === 'sidebar') {
+          const menuLogo = document.getElementById('preview-menu-logo');
+          if (menuLogo) menuLogo.src = result.url + '&t=' + timestamp;
+        } else if (internalType === 'login' || internalType === 'header') {
+          const loginLogo = document.getElementById('preview-login-logo');
+          if (loginLogo) loginLogo.src = result.url + '&t=' + timestamp;
+        }
+      });
     } else {
       alert('Erro ao fazer upload: ' + result.error);
     }
@@ -881,6 +903,13 @@ function uploadLogoToServer(file, type) {
   .catch(error => {
     console.error('Upload error:', error);
     alert('Erro ao fazer upload do logo');
+  })
+  .finally(() => {
+    // Restaurar texto original do botão
+    if (button && originalText) {
+      button.innerHTML = originalText;
+      button.disabled = false;
+    }
   });
 
 // ==============================
@@ -959,19 +988,8 @@ function deleteBranchCfg(id){
     .catch(()=>alert('Erro ao excluir filial'));
 }
 
-// Auto-load filiais list when Filiais tab is active
-document.addEventListener('DOMContentLoaded', function(){
-  if (CFG_ABA === 'filiais'){
-    loadBranchesCfg();
-  }
-  
-  // Auto-load logos when Sistema tab is active
-  if (CFG_ABA === 'sistema'){
-    if (typeof loadLogos === 'function') {
-      loadLogos();
-    }
-  }
-});
+// Comentário para manter a estrutura do código
+// O event listener unificado foi movido para o final do arquivo
 
 function updateLogoSize(type) {
   const width = document.getElementById(type + '-logo-width').value;
@@ -1056,14 +1074,6 @@ function resetLogos() {
   }
 }
 
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-  // Initialize slider values
-  updateLogoSize('menu');
-  updateLogoSize('login');
-  updatePreview();
-});
-
 // Submissão do formulário de usuário
 document.getElementById('addUserForm').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -1096,8 +1106,17 @@ document.getElementById('addUserForm').addEventListener('submit', function(e) {
   });
 });
 
-// Sistema de upload de logos
+// Event listener unificado para inicialização da página
 document.addEventListener('DOMContentLoaded', function() {
+  // 1. Inicializar configurações de logo
+  // Initialize slider values
+  updateLogoSize('menu');
+  updateLogoSize('login');
+  
+  // Update preview text
+  updatePreviewText();
+  
+  // 2. Configurar uploads de logo
   // Upload de logo sidebar
   const sidebarForm = document.getElementById('logo-sidebar-form');
   if (sidebarForm) {
@@ -1116,53 +1135,59 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
+  // Configurar os inputs de upload da aba empresa
+  const menuLogoInput = document.getElementById('menu-logo-input');
+  if (menuLogoInput) {
+    menuLogoInput.onchange = function() {
+      handleLogoUpload(this, 'menu');
+    };
+  }
+  
+  const loginLogoInput = document.getElementById('login-logo-input');
+  if (loginLogoInput) {
+    loginLogoInput.onchange = function() {
+      handleLogoUpload(this, 'login');
+    };
+  }
+  
   // Carregar logos existentes
   if (document.getElementById('logos-list')) {
     loadLogos();
   }
+  
+  // 3. Carregar dados específicos da aba
+  // Load filiais if on filiais tab
+  if (CFG_ABA === 'filiais') {
+    loadBranchesCfg();
+  }
+  
+  // Load user data if on users tab
+  if (CFG_ABA === 'usuarios') {
+    loadUsers();
+  }
 });
 
+// Função unificada para upload de logo a partir de um formulário
 function uploadLogo(form, tipo) {
   const formData = new FormData(form);
+  const file = formData.get('logo');
+  
+  if (!file || file.size === 0) {
+    alert('Selecione um arquivo de imagem válido.');
+    return;
+  }
+  
+  // Adicionar atributo data-logo-type ao botão para identificação
   const button = form.querySelector('button[type="submit"]');
-  const originalText = button.innerHTML;
+  if (button) {
+    button.setAttribute('data-logo-type', tipo);
+  }
   
-  button.innerHTML = '<span>⏳</span> Enviando...';
-  button.disabled = true;
+  // Usar a função unificada de upload
+  uploadLogoToServer(file, tipo);
   
-  fetch('backend/api/logos.php', {
-    method: 'POST',
-    body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      alert('Logo enviado com sucesso!');
-      form.reset();
-      loadLogos();
-      
-      // Atualizar logo no sidebar se for do tipo sidebar
-      if (tipo === 'sidebar') {
-        const sidebarLogo = document.getElementById('sidebar-logo');
-        const logoFallback = document.getElementById('logo-fallback');
-        if (sidebarLogo) {
-          sidebarLogo.src = data.url + '&t=' + Date.now();
-          sidebarLogo.style.display = 'block';
-          if (logoFallback) logoFallback.style.display = 'none';
-        }
-      }
-    } else {
-      alert('Erro: ' + data.error);
-    }
-  })
-  .catch(error => {
-    console.error('Erro:', error);
-    alert('Erro ao enviar logo');
-  })
-  .finally(() => {
-    button.innerHTML = originalText;
-    button.disabled = false;
-  });
+  // Resetar o formulário
+  form.reset();
 }
 
 function loadLogos() {

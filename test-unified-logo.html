@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Upload de Logo Unificado</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            margin-top: 0;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background-color: #f9fafb;
+        }
+        h2 {
+            color: #4b5563;
+            margin-top: 0;
+        }
+        .logo-form {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f0f9ff;
+            border-radius: 6px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input[type="file"] {
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .preview-area {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px dashed #d1d5db;
+            border-radius: 6px;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .preview-area img {
+            max-width: 200px;
+            max-height: 100px;
+            margin-bottom: 10px;
+        }
+        .preview-area p {
+            color: #6b7280;
+            font-style: italic;
+        }
+        .logo-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .logo-item {
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: white;
+        }
+        .logo-item img {
+            max-width: 100px;
+            max-height: 60px;
+            margin-bottom: 10px;
+        }
+        .logo-info {
+            text-align: center;
+            width: 100%;
+        }
+        .logo-info strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .logo-info small {
+            display: block;
+            color: #6b7280;
+            margin-bottom: 3px;
+        }
+        .delete-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+            margin-top: 10px;
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+        .delete-btn:hover {
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+        .test-result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            background-color: #ecfdf5;
+            border-left: 4px solid #10b981;
+            display: none;
+        }
+        .test-result.error {
+            background-color: #fef2f2;
+            border-left-color: #ef4444;
+        }
+        .test-result pre {
+            margin: 10px 0 0;
+            padding: 10px;
+            background-color: #f8fafc;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-family: monospace;
+        }
+        .sidebar-preview {
+            width: 280px;
+            height: 100px;
+            background: linear-gradient(180deg, #1e293b 0%, #334155 100%);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .sidebar-preview img {
+            max-width: 80px;
+            max-height: 40px;
+            margin-right: 15px;
+        }
+        .sidebar-preview .fallback {
+            width: 80px;
+            height: 40px;
+            background-color: rgba(255,255,255,0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .sidebar-preview .text {
+            color: white;
+        }
+        .sidebar-preview .text strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+        .sidebar-preview .text span {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Teste de Upload de Logo Unificado</h1>
+        
+        <div class="test-section">
+            <h2>1. Upload de Logo do Sidebar</h2>
+            <form id="sidebar-logo-form" class="logo-form">
+                <input type="hidden" name="tipo" value="sidebar">
+                <input type="hidden" name="nome" value="Logo Sidebar">
+                <div class="form-group">
+                    <label>Selecionar Imagem (PNG, JPG, SVG - máx 5MB)</label>
+                    <input type="file" name="logo" accept="image/*" required>
+                </div>
+                <button type="submit" data-logo-type="sidebar">📤 Enviar Logo Sidebar</button>
+            </form>
+            
+            <div class="preview-area">
+                <img id="sidebar-preview" src="" alt="Preview" style="display: none;">
+                <p>Preview do logo aparecerá aqui</p>
+            </div>
+            
+            <div class="sidebar-preview">
+                <img id="sidebar-logo" src="" alt="Logo" style="display: none;">
+                <div id="logo-fallback" class="fallback">SGQ</div>
+                <div class="text">
+                    <strong>SGQ OTI</strong>
+                    <span>Sistema de Gestão da Qualidade</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>2. Upload de Logo do Header</h2>
+            <form id="header-logo-form" class="logo-form">
+                <input type="hidden" name="tipo" value="header">
+                <input type="hidden" name="nome" value="Logo Header">
+                <div class="form-group">
+                    <label>Selecionar Imagem (PNG, JPG, SVG - máx 5MB)</label>
+                    <input type="file" name="logo" accept="image/*" required>
+                </div>
+                <button type="submit" data-logo-type="header">📤 Enviar Logo Header</button>
+            </form>
+            
+            <div class="preview-area">
+                <img id="header-preview" src="" alt="Preview" style="display: none;">
+                <p>Preview do logo aparecerá aqui</p>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>3. Logos Cadastrados</h2>
+            <button id="load-logos-btn">🔄 Carregar Logos</button>
+            
+            <div id="logos-list" class="logo-list">
+                <!-- Logos serão carregados aqui -->
+                <p>Clique no botão acima para carregar os logos</p>
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>4. Teste de API</h2>
+            <button id="test-api-btn">🧪 Testar API</button>
+            
+            <div id="api-result" class="test-result">
+                <strong>Resultado do teste:</strong>
+                <pre id="api-result-content"></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Função unificada para upload de logo
+        function uploadLogoToServer(file, type) {
+            const formData = new FormData();
+            formData.append('logo', file);
+            formData.append('tipo', type);
+            formData.append('nome', 'Logo ' + type.charAt(0).toUpperCase() + type.slice(1));
+            
+            // Mostrar indicador de carregamento
+            const button = document.querySelector(`button[data-logo-type="${type}"]`);
+            const originalText = button ? button.innerHTML : null;
+            if (button) {
+                button.innerHTML = '<span>⏳</span> Enviando...';
+                button.disabled = true;
+            }
+            
+            fetch('backend/api/logos.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('Logo enviado com sucesso!');
+                    
+                    // Atualizar preview
+                    const timestamp = new Date().getTime();
+                    const previewImg = document.getElementById(type + '-preview');
+                    if (previewImg) {
+                        previewImg.src = result.url + '&t=' + timestamp;
+                        previewImg.style.display = 'block';
+                    }
+                    
+                    // Atualizar sidebar se for logo do sidebar
+                    if (type === 'sidebar') {
+                        const sidebarLogo = document.getElementById('sidebar-logo');
+                        const logoFallback = document.getElementById('logo-fallback');
+                        if (sidebarLogo) {
+                            sidebarLogo.src = result.url + '&t=' + timestamp;
+                            sidebarLogo.style.display = 'block';
+                            if (logoFallback) logoFallback.style.display = 'none';
+                        }
+                    }
+                    
+                    // Recarregar lista de logos
+                    loadLogos();
+                } else {
+                    alert('Erro ao fazer upload: ' + result.error);
+                }
+            })
+            .catch(error => {
+                console.error('Upload error:', error);
+                alert('Erro ao fazer upload do logo');
+            })
+            .finally(() => {
+                // Restaurar texto original do botão
+                if (button && originalText) {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            });
+        }
+
+        // Função para carregar logos
+        function loadLogos() {
+            const logosList = document.getElementById('logos-list');
+            if (!logosList) return;
+            
+            logosList.innerHTML = '<p>Carregando logos...</p>';
+            
+            fetch('backend/api/logos.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.logos && data.logos.length > 0) {
+                    logosList.innerHTML = '';
+                    
+                    data.logos.forEach(logo => {
+                        const logoDiv = document.createElement('div');
+                        logoDiv.className = 'logo-item';
+                        
+                        const timestamp = new Date().getTime();
+                        logoDiv.innerHTML = `
+                            <img src="${logo.url}&t=${timestamp}" alt="${logo.nome}">
+                            <div class="logo-info">
+                                <strong>${logo.nome}</strong>
+                                <small>Tipo: ${logo.tipo}</small>
+                                <small>Tamanho: ${(logo.tamanho / 1024).toFixed(1)} KB</small>
+                            </div>
+                            <button onclick="deleteLogo(${logo.id})" class="delete-btn">🗑️ Excluir</button>
+                        `;
+                        logosList.appendChild(logoDiv);
+                    });
+                } else {
+                    logosList.innerHTML = '<p>Nenhum logo encontrado</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar logos:', error);
+                logosList.innerHTML = '<p>Erro ao carregar logos</p>';
+            });
+        }
+
+        // Função para deletar logo
+        function deleteLogo(id) {
+            if (confirm('Tem certeza que deseja remover este logo?')) {
+                fetch(`backend/api/logos.php?id=${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Logo removido com sucesso!');
+                        loadLogos();
+                        
+                        // Verificar se precisa atualizar previews
+                        checkAndUpdatePreviews();
+                    } else {
+                        alert('Erro: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao remover logo');
+                });
+            }
+        }
+
+        // Verificar e atualizar previews após exclusão
+        function checkAndUpdatePreviews() {
+            // Recarregar logo do sidebar
+            const sidebarLogo = document.getElementById('sidebar-logo');
+            const logoFallback = document.getElementById('logo-fallback');
+            
+            if (sidebarLogo) {
+                const timestamp = new Date().getTime();
+                sidebarLogo.src = 'backend/api/logos.php?tipo=sidebar&download=1&t=' + timestamp;
+                
+                sidebarLogo.onload = function() {
+                    sidebarLogo.style.display = 'block';
+                    if (logoFallback) logoFallback.style.display = 'none';
+                };
+                
+                sidebarLogo.onerror = function() {
+                    sidebarLogo.style.display = 'none';
+                    if (logoFallback) logoFallback.style.display = 'block';
+                };
+            }
+            
+            // Recarregar previews
+            const sidebarPreview = document.getElementById('sidebar-preview');
+            const headerPreview = document.getElementById('header-preview');
+            
+            if (sidebarPreview) {
+                const timestamp = new Date().getTime();
+                sidebarPreview.src = 'backend/api/logos.php?tipo=sidebar&download=1&t=' + timestamp;
+                
+                sidebarPreview.onload = function() {
+                    sidebarPreview.style.display = 'block';
+                };
+                
+                sidebarPreview.onerror = function() {
+                    sidebarPreview.style.display = 'none';
+                };
+            }
+            
+            if (headerPreview) {
+                const timestamp = new Date().getTime();
+                headerPreview.src = 'backend/api/logos.php?tipo=header&download=1&t=' + timestamp;
+                
+                headerPreview.onload = function() {
+                    headerPreview.style.display = 'block';
+                };
+                
+                headerPreview.onerror = function() {
+                    headerPreview.style.display = 'none';
+                };
+            }
+        }
+
+        // Testar API
+        function testApi() {
+            const resultDiv = document.getElementById('api-result');
+            const resultContent = document.getElementById('api-result-content');
+            
+            resultDiv.style.display = 'block';
+            resultDiv.classList.remove('error');
+            resultContent.textContent = 'Testando API...';
+            
+            fetch('backend/api/logos.php')
+            .then(response => response.json())
+            .then(data => {
+                resultContent.textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                resultDiv.classList.add('error');
+                resultContent.textContent = 'Erro ao acessar API: ' + error.message;
+            });
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Formulário de upload do sidebar
+            const sidebarForm = document.getElementById('sidebar-logo-form');
+            if (sidebarForm) {
+                sidebarForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const fileInput = this.querySelector('input[type="file"]');
+                    const file = fileInput.files[0];
+                    
+                    if (!file) {
+                        alert('Selecione um arquivo de imagem');
+                        return;
+                    }
+                    
+                    // Preview local antes do upload
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('sidebar-preview');
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    // Upload para o servidor
+                    uploadLogoToServer(file, 'sidebar');
+                });
+            }
+            
+            // Formulário de upload do header
+            const headerForm = document.getElementById('header-logo-form');
+            if (headerForm) {
+                headerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const fileInput = this.querySelector('input[type="file"]');
+                    const file = fileInput.files[0];
+                    
+                    if (!file) {
+                        alert('Selecione um arquivo de imagem');
+                        return;
+                    }
+                    
+                    // Preview local antes do upload
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const preview = document.getElementById('header-preview');
+                        preview.src = e.target.result;
+                        preview.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                    
+                    // Upload para o servidor
+                    uploadLogoToServer(file, 'header');
+                });
+            }
+            
+            // Botão de carregar logos
+            const loadLogosBtn = document.getElementById('load-logos-btn');
+            if (loadLogosBtn) {
+                loadLogosBtn.addEventListener('click', loadLogos);
+            }
+            
+            // Botão de testar API
+            const testApiBtn = document.getElementById('test-api-btn');
+            if (testApiBtn) {
+                testApiBtn.addEventListener('click', testApi);
+            }
+            
+            // Carregar previews iniciais
+            checkAndUpdatePreviews();
+        });
+    </script>
+</body>
+</html>
