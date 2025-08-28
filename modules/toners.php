@@ -17,9 +17,9 @@
                         class="tab-button py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">
                     Registro de Retornados
                 </button>
-                <button onclick="switchTab('config')" id="tab-config" 
+                <button onclick="switchTab('filiais')" id="tab-filiais" 
                         class="tab-button py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">
-                    Configurações
+                    Cadastro de Filiais
                 </button>
             </nav>
         </div>
@@ -129,6 +129,38 @@
         </div>
     </div>
     
+    <div id="content-filiais" class="tab-content hidden">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-800">Cadastro de Filiais</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nome da Filial</label>
+                    <input id="branch-name" type="text" class="w-full px-3 py-2 border rounded-lg" placeholder="Ex.: Matriz" />
+                </div>
+                <div class="flex items-end">
+                    <button onclick="saveBranch()" class="w-full md:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg">
+                        <i class="fas fa-save mr-2"></i><span id="branch-submit-text">Adicionar</span>
+                    </button>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="branches-tbody" class="bg-white divide-y divide-gray-200">
+                        <!-- Carregado via JS (renderBranchesGrid) -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
 </div>
 
     <!-- Conteúdo das Abas -->
@@ -184,7 +216,7 @@
                         <span class="text-gray-400">→</span>
                         <input type="date" id="filter-end" class="border rounded px-2 py-1 text-sm" />
                     </div>
-                    <input type="text" id="returns-search" placeholder="Buscar (modelo, cliente, filial)" class="border rounded px-3 py-1.5 text-sm w-full sm:w-64" oninput="loadReturns()" />
+                    <input type="text" id="returns-search" placeholder="Buscar (modelo, filial, destino, usuário)" class="border rounded px-3 py-1.5 text-sm w-full sm:w-64" oninput="loadReturns()" />
                     <button onclick="exportReturns()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm font-medium"><i class="fas fa-file-export mr-2"></i>Exportar</button>
                     <button onclick="openReturnModal()" 
                             class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
@@ -200,12 +232,10 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso (g)</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% Presente</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destino</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Valor Recuperado</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Usuário</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                         </tr>
                     </thead>
@@ -216,29 +246,7 @@
             </div>
         </div>
     </div>
-    <div id="content-config" class="tab-content hidden">
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">Cadastro de Filiais</h3>
-            <form class="flex flex-col sm:flex-row gap-3 mb-6" onsubmit="event.preventDefault(); saveBranch();">
-                <input type="hidden" id="branch-id" value="">
-                <input id="branch-name" type="text" placeholder="Nome da filial" class="flex-1 border rounded px-3 py-2" required>
-                <button id="branch-submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
-                    <i class="fas fa-save mr-2"></i><span id="branch-submit-text">Adicionar</span>
-                </button>
-            </form>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="branches-tbody" class="bg-white divide-y divide-gray-200"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+    
 </div>
 
 <!-- Modal de Cadastro de Toner -->
@@ -793,7 +801,7 @@ function getOrientationClass(p){
 
 function updateOrientationUI(p){
     const el = document.getElementById('orientacao-text');
-    const txt = p>0 ? getOrientation(p) : 'Informe peso ou % para orientar';
+    const txt = getOrientation(p);
     el.textContent = txt;
     el.className = `px-3 py-2 border rounded-lg text-sm font-medium ${getOrientationClass(p)}`;
 }
@@ -809,11 +817,10 @@ function setDestino(dest){
 
 function validateReturnForm(){
     const tonerId = document.getElementById('return-toner').value;
-    const clienteCodigo = document.getElementById('return-cliente-codigo').value.trim();
     const filial = document.getElementById('return-filial-select').value.trim();
     const dest = document.getElementById('return-destino').value;
     const mode = document.querySelector('input[name="return-modo"]:checked').value;
-    let okCampos = !!(tonerId && clienteCodigo && filial && dest);
+    let okCampos = !!(tonerId && filial && dest);
     if (mode==='peso') okCampos = okCampos && !!document.getElementById('return-peso').value;
     if (mode==='percent') okCampos = okCampos && !!document.getElementById('return-percent').value;
     document.getElementById('return-register-btn').disabled = !okCampos;
@@ -821,21 +828,17 @@ function validateReturnForm(){
 
 function submitReturn(){
     const tonerId = Number(document.getElementById('return-toner').value);
-    const clienteCodigo = document.getElementById('return-cliente-codigo').value.trim();
     const filial = document.getElementById('return-filial-select').value.trim();
     const mode = document.querySelector('input[name="return-modo"]:checked').value;
     const peso = document.getElementById('return-peso').value;
     const percent = document.getElementById('return-percent').value;
     const destino = document.getElementById('return-destino').value;
-    const observacoes = document.getElementById('return-observacoes').value.trim();
 
     const payload = {
         toner_id: tonerId,
-        cliente_codigo: clienteCodigo,
         filial: filial,
         modo: mode,
-        destino: destino,
-        observacoes: observacoes
+        destino: destino
     };
     if (mode==='peso') payload.peso_retornado = Number(peso);
     if (mode==='percent') payload.percentual = Number(percent);
@@ -1069,21 +1072,20 @@ function renderReturnsGrid(){
     const tbody = document.getElementById('returns-tbody');
     if (!tbody) return;
     if (!returnsData.length){
-        tbody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">Nenhum retorno registrado</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Nenhum retorno registrado</td></tr>`;
         return;
     }
     tbody.innerHTML = returnsData.map(r=>{
         const badge = r.destino === 'descarte' ? 'bg-red-100 text-red-800' : r.destino==='estoque' ? 'bg-green-100 text-green-800' : r.destino==='garantia' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800';
+        const valor = (Number(r.valor_recuperado||0)).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
         return `
         <tr class="hover:bg-gray-50">
             <td class="px-6 py-3 text-sm text-gray-700">${new Date(r.created_at).toLocaleString()}</td>
             <td class="px-6 py-3 text-sm font-medium text-gray-900">${r.modelo}</td>
-            <td class="px-6 py-3 text-sm text-gray-700">${r.cliente_codigo} ${r.cliente_nome?('- '+r.cliente_nome):''}</td>
             <td class="px-6 py-3 text-sm text-gray-700">${r.filial}</td>
-            <td class="px-6 py-3 text-sm text-gray-700">${r.modo==='peso'?'Peso':'%'} </td>
-            <td class="px-6 py-3 text-sm text-gray-700">${r.peso_retornado ?? '-'}</td>
-            <td class="px-6 py-3 text-sm text-gray-700">${Number(r.percentual||0).toFixed(2)}%</td>
             <td class="px-6 py-3 text-sm"><span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${badge}">${r.destino}</span></td>
+            <td class="px-6 py-3 text-sm text-gray-700">${valor}</td>
+            <td class="px-6 py-3 text-sm text-gray-700">${r.user_name || '-'}</td>
             <td class="px-6 py-3 text-sm font-medium">
                 <button class="text-blue-600 hover:text-blue-900 mr-3" onclick='handleEditReturn(${JSON.stringify(r).replace(/'/g,"&apos;")})'>Editar</button>
                 <button class="text-red-600 hover:text-red-900" onclick="handleDeleteReturn(${r.id})">Excluir</button>
@@ -1093,7 +1095,19 @@ function renderReturnsGrid(){
 }
 
 function handleEditReturn(r){
-    openReturnModal(r);
+    const novoFilial = prompt('Filial:', r.filial || '');
+    if (novoFilial === null) return;
+    const novoDestino = prompt('Destino (descarte/estoque/garantia/uso_interno):', r.destino || 'descarte');
+    if (novoDestino === null) return;
+    const payload = {};
+    if (novoFilial && novoFilial !== r.filial) payload.filial = novoFilial.trim();
+    if (novoDestino && novoDestino !== r.destino) payload.destino = novoDestino.trim();
+    if (Object.keys(payload).length === 0) return;
+    fetch(`backend/api/returns.php?id=${r.id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload)})
+        .then(resp=>resp.json()).then(res=>{
+            if (res.success){ loadReturns(); }
+            else alert('Erro ao atualizar');
+        }).catch(()=>alert('Erro ao atualizar'));
 }
 
 function handleDeleteReturn(id){

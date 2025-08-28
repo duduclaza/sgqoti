@@ -13,6 +13,9 @@ $aba = $_GET['aba'] ?? 'sistema';
       <a href="?module=configuracoes&aba=empresa" class="sap-tab-link <?= $aba == 'empresa' ? 'active' : '' ?>">
         <span class="sap-tab-icon">🏢</span>Dados da Empresa
       </a>
+      <a href="?module=configuracoes&aba=filiais" class="sap-tab-link <?= $aba == 'filiais' ? 'active' : '' ?>">
+        <span class="sap-tab-icon">🏬</span>Filiais
+      </a>
       <a href="?module=configuracoes&aba=usuarios" class="sap-tab-link <?= $aba == 'usuarios' ? 'active' : '' ?>">
         <span class="sap-tab-icon">👥</span>Usuários
       </a>
@@ -168,6 +171,44 @@ $aba = $_GET['aba'] ?? 'sistema';
           </div>
         </div>
         
+      <?php elseif ($aba == 'filiais'): ?>
+        <!-- Aba Filiais -->
+        <div class="sap-card">
+          <div class="sap-card-header">
+            <h3 class="sap-card-title">Cadastro de Filiais</h3>
+          </div>
+          <div class="sap-card-content">
+            <form class="sap-form" onsubmit="event.preventDefault(); saveBranchCfg();">
+              <input type="hidden" id="cfg-branch-id" value="">
+              <div class="sap-form-group">
+                <label class="sap-label">Nome da Filial</label>
+                <input id="cfg-branch-name" type="text" class="sap-input" placeholder="Ex.: Matriz" required>
+              </div>
+              <div class="sap-form-actions">
+                <button class="sap-button" id="cfg-branch-submit">
+                  <span class="sap-button-icon">💾</span><span id="cfg-branch-submit-text">Adicionar</span>
+                </button>
+              </div>
+            </form>
+
+            <div class="sap-table-container" style="margin-top:16px;">
+              <table class="sap-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Filial</th>
+                    <th>Criada em</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="cfg-branches-tbody">
+                  <tr><td colspan="4" class="text-center">Carregando...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
       <?php elseif ($aba == 'usuarios'): ?>
         <!-- Aba Usuários -->
         <div class="sap-card">
@@ -742,7 +783,89 @@ function uploadLogoToServer(file, type) {
   .catch(error => {
     console.error('Upload error:', error);
   });
+
+// ==============================
+// Filiais (Configurações)
+// ==============================
+const CFG_ABA = '<?= $aba ?>';
+let cfgBranches = [];
+let cfgEditingBranchId = null;
+
+function loadBranchesCfg(){
+  fetch('backend/api/branches.php')
+    .then(r=>r.json())
+    .then(res=>{ if(res.success){ cfgBranches = res.data||[]; renderBranchesGridCfg(); } else { renderBranchesGridCfg(true); }})
+    .catch(()=>renderBranchesGridCfg(true));
 }
+
+function renderBranchesGridCfg(error=false){
+  const tbody = document.getElementById('cfg-branches-tbody');
+  if (!tbody) return;
+  if (error){
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Erro ao carregar filiais</td></tr>';
+    return;
+  }
+  if (!cfgBranches.length){
+    tbody.innerHTML = '<tr><td colspan="4" class="text-center">Nenhuma filial cadastrada</td></tr>';
+    return;
+  }
+  tbody.innerHTML = cfgBranches.map(b=>`
+    <tr>
+      <td>${b.id}</td>
+      <td>${b.nome}</td>
+      <td>${b.created_at ? new Date(b.created_at).toLocaleString() : '-'}</td>
+      <td>
+        <button class="sap-button-small" onclick="startEditBranchCfg(${b.id})">✏️</button>
+        <button class="sap-button-small sap-button-danger" onclick="deleteBranchCfg(${b.id})">🗑️</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function saveBranchCfg(){
+  const id = cfgEditingBranchId;
+  const nome = document.getElementById('cfg-branch-name').value.trim();
+  if (!nome) return;
+  const url = id ? `backend/api/branches.php?id=${id}` : 'backend/api/branches.php';
+  const method = id ? 'PUT' : 'POST';
+  fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nome }) })
+    .then(r=>r.json())
+    .then(res=>{
+      if (res.success){
+        document.getElementById('cfg-branch-name').value = '';
+        cfgEditingBranchId = null;
+        const btnText = document.getElementById('cfg-branch-submit-text');
+        if (btnText) btnText.textContent = 'Adicionar';
+        loadBranchesCfg();
+      } else {
+        alert('Erro ao salvar filial');
+      }
+    })
+    .catch(()=>alert('Erro ao salvar filial'));
+}
+
+function startEditBranchCfg(id){
+  const b = cfgBranches.find(x=>x.id==id); if(!b) return;
+  cfgEditingBranchId = id;
+  document.getElementById('cfg-branch-name').value = b.nome;
+  const btnText = document.getElementById('cfg-branch-submit-text');
+  if (btnText) btnText.textContent = 'Salvar';
+}
+
+function deleteBranchCfg(id){
+  if (!confirm('Excluir filial?')) return;
+  fetch(`backend/api/branches.php?id=${id}`, { method: 'DELETE' })
+    .then(r=>r.json())
+    .then(res=>{ if(res.success){ loadBranchesCfg(); } else { alert('Erro ao excluir filial'); } })
+    .catch(()=>alert('Erro ao excluir filial'));
+}
+
+// Auto-load filiais list when Filiais tab is active
+document.addEventListener('DOMContentLoaded', function(){
+  if (CFG_ABA === 'filiais'){
+    loadBranchesCfg();
+  }
+});
 
 function updateLogoSize(type) {
   const width = document.getElementById(type + '-logo-width').value;

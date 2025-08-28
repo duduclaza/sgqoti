@@ -4,6 +4,12 @@ require_once '../config/cors.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
+$session_started = false;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+    $session_started = true;
+}
+
 $method = $_SERVER['REQUEST_METHOD'];
 
 try {
@@ -19,24 +25,30 @@ try {
         tipo VARCHAR(32) NOT NULL,
         capacidade INT NOT NULL,
         preco_folha DECIMAL(10,4) NOT NULL,
-        cliente_codigo VARCHAR(64) NOT NULL,
-        cliente_nome VARCHAR(255) NULL,
         filial VARCHAR(128) NOT NULL,
         modo VARCHAR(10) NOT NULL, -- 'peso' ou 'percent'
         peso_retornado DECIMAL(10,3) NULL,
         percentual DECIMAL(5,2) NOT NULL,
-        orientacao VARCHAR(255) NOT NULL,
         destino VARCHAR(32) NOT NULL, -- descarte, estoque, garantia, uso_interno
         valor_recuperado DECIMAL(12,2) DEFAULT 0,
-        observacoes TEXT NULL,
+        user_name VARCHAR(255) NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
         FOREIGN KEY (toner_id) REFERENCES toners(id)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
 
+    // Ajustes de migração leve: garantir coluna user_name
+    // e manter compatibilidade caso a tabela já exista com colunas antigas
+    try {
+        $pdo->exec("ALTER TABLE toner_returns ADD COLUMN user_name VARCHAR(255) NOT NULL DEFAULT ''");
+    } catch (Exception $e) {
+        // coluna já existe
+    }
+
     switch ($method) {
         case 'GET':
-            $query = "SELECT * FROM toner_returns WHERE 1=1";
+            // Retornar campos essenciais para o grid e toner_id para edição
+            $query = "SELECT id, created_at, modelo, filial, destino, valor_recuperado, user_name, toner_id FROM toner_returns WHERE 1=1";
             $params = [];
             if (!empty($_GET['start'])) {
                 $query .= " AND created_at >= ?";
@@ -47,7 +59,7 @@ try {
                 $params[] = $_GET['end'] . ' 23:59:59';
             }
             if (!empty($_GET['q'])) {
-                $query .= " AND (modelo LIKE ? OR cliente_codigo LIKE ? OR cliente_nome LIKE ? OR filial LIKE ?)";
+                $query .= " AND (modelo LIKE ? OR filial LIKE ? OR destino LIKE ? OR user_name LIKE ?)";
                 $params[] = '%' . $_GET['q'] . '%';
                 $params[] = '%' . $_GET['q'] . '%';
                 $params[] = '%' . $_GET['q'] . '%';
@@ -63,17 +75,15 @@ try {
             if (!$data) { throw new Exception('Payload inválido'); }
 
             $tonerId = (int)($data['toner_id'] ?? 0);
-            $clienteCodigo = trim($data['cliente_codigo'] ?? '');
-            $clienteNome = trim($data['cliente_nome'] ?? '');
             $filial = trim($data['filial'] ?? '');
             $modo = $data['modo'] ?? 'peso';
             $pesoRetornado = isset($data['peso_retornado']) ? (float)$data['peso_retornado'] : null;
             $percentualInformado = isset($data['percentual']) ? (float)$data['percentual'] : null;
             $destino = $data['destino'] ?? '';
-            $observacoes = trim($data['observacoes'] ?? '');
+            $userName = isset($_SESSION['user_name']) ? trim((string)$_SESSION['user_name']) : '';
 
-            if (!$tonerId || !$clienteCodigo || !$filial || !$destino) {
-                throw new Exception('Campos obrigatórios: toner_id, cliente_codigo, filial, destino');
+            if (!$tonerId || !$filial || !$destino) {
+                throw new Exception('Campos obrigatórios: toner_id, filial, destino');
             }
             if (!in_array($modo, ['peso','percent'])) { throw new Exception('Modo inválido'); }
             if (!in_array($destino, ['descarte','estoque','garantia','uso_interno'])) { throw new Exception('Destino inválido'); }
@@ -98,9 +108,6 @@ try {
                 $percentual = max(0.0, min(100.0, (float)$percentualInformado));
             }
 
-            // Orientação
-            $orientacao = orientacaoPorPercentual($percentual);
-
             // Valor recuperado (apenas quando destino = estoque)
             $valorRecuperado = 0;
             if ($destino === 'estoque') {
@@ -109,8 +116,8 @@ try {
             }
 
             $stmt = $pdo->prepare("INSERT INTO toner_returns
-                (toner_id, modelo, cor, tipo, capacidade, preco_folha, cliente_codigo, cliente_nome, filial, modo, peso_retornado, percentual, orientacao, destino, valor_recuperado, observacoes)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                (toner_id, modelo, cor, tipo, capacidade, preco_folha, filial, modo, peso_retornado, percentual, destino, valor_recuperado, user_name)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             $stmt->execute([
                 $tonerId,
                 $toner['modelo'],
@@ -118,19 +125,16 @@ try {
                 $toner['tipo'],
                 $capacidade,
                 $precoFolha,
-                $clienteCodigo,
-                $clienteNome,
                 $filial,
                 $modo,
                 $pesoRetornado,
                 $percentual,
-                $orientacao,
                 $destino,
                 $valorRecuperado,
-                $observacoes
+                $userName
             ]);
 
-            echo json_encode(['success' => true, 'id' => $pdo->lastInsertId(), 'orientacao' => $orientacao, 'percentual' => $percentual, 'valor_recuperado' => $valorRecuperado]);
+            echo json_encode(['success' => true, 'id' => $pdo->lastInsertId(), 'percentual' => $percentual, 'valor_recuperado' => $valorRecuperado]);
             break;
         case 'PUT':
             parse_str($_SERVER['QUERY_STRING'] ?? '', $qs);
@@ -140,15 +144,11 @@ try {
             if (!$data) { throw new Exception('Payload inválido'); }
 
             $destino = $data['destino'] ?? null;
-            $observacoes = $data['observacoes'] ?? null;
             $filial = $data['filial'] ?? null;
-            $clienteNome = $data['cliente_nome'] ?? null;
 
             $sets = [];$params=[];
             if ($destino){$sets[]='destino=?';$params[]=$destino;}
-            if ($observacoes !== null){$sets[]='observacoes=?';$params[]=$observacoes;}
             if ($filial){$sets[]='filial=?';$params[]=$filial;}
-            if ($clienteNome!==null){$sets[]='cliente_nome=?';$params[]=$clienteNome;}
             if (!$sets){ throw new Exception('Nada para atualizar'); }
             $params[]=$id;
 
@@ -173,9 +173,3 @@ try {
     echo json_encode(['error' => $e->getMessage()]);
 }
 
-function orientacaoPorPercentual($p){
-    if ($p <= 5) return 'Descarte o toner.';
-    if ($p <= 40) return 'Teste o toner; se estiver com qualidade boa use internamente; se não, descarte.';
-    if ($p <= 80) return 'Teste o toner; se estiver com qualidade boa, envie para o estoque como semi novo com % na caixa e envie para a garantia.';
-    return 'Teste o toner; se estiver com qualidade boa, envie para o estoque como novo; se não, envie para garantia.';
-}
