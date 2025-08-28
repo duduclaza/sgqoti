@@ -98,13 +98,14 @@
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl lg:max-w-4xl max-h-[90vh] overflow-y-auto relative z-[10000]">
             <div class="p-3 sm:p-4 lg:p-6">
                 <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-lg font-semibold text-gray-800">Cadastro de Toner</h3>
+                    <h3 id="modal-title" class="text-lg font-semibold text-gray-800">Cadastro de Toner</h3>
                     <button onclick="closeTonerModal()" class="text-gray-400 hover:text-gray-600">
                         <i class="fas fa-times text-xl"></i>
                     </button>
                 </div>
                 
                 <form id="toner-form" class="space-y-3 sm:space-y-4">
+                    <input type="hidden" id="toner-id" name="id" value="">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
                         <div class="sm:col-span-2 lg:col-span-1">
                             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Modelo *</label>
@@ -190,9 +191,9 @@
                                 class="w-full sm:w-auto px-6 py-3 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors text-sm sm:text-base">
                             Cancelar
                         </button>
-                        <button type="submit" 
+                        <button type="submit" id="submit-btn"
                                 class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors text-sm sm:text-base">
-                            <i class="fas fa-save mr-2"></i>Salvar Toner
+                            <i id="submit-icon" class="fas fa-save mr-2"></i><span id="submit-text">Salvar Toner</span>
                         </button>
                     </div>
                 </form>
@@ -402,6 +403,7 @@
 // Variáveis globais
 let currentTab = 'cadastro';
 let toners = [];
+let editingTonerId = null;
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
@@ -436,6 +438,11 @@ function switchTab(tab) {
 
 // Funções do modal
 function openTonerModal() {
+    editingTonerId = null;
+    document.getElementById('modal-title').textContent = 'Cadastro de Toner';
+    document.getElementById('submit-text').textContent = 'Salvar Toner';
+    document.getElementById('submit-icon').className = 'fas fa-save mr-2';
+    document.getElementById('toner-id').value = '';
     document.getElementById('toner-modal').classList.remove('hidden');
     document.getElementById('toner-form').reset();
 }
@@ -486,8 +493,12 @@ function saveToner() {
     tonerData.gramatura_folha = document.getElementById('gramatura_folha').value;
     tonerData.preco_folha = document.getElementById('preco_folha').value;
     
-    fetch('backend/api/toners.php', {
-        method: 'POST',
+    const isEditing = editingTonerId !== null;
+    const method = isEditing ? 'PUT' : 'POST';
+    const url = isEditing ? `backend/api/toners.php?id=${editingTonerId}` : 'backend/api/toners.php';
+    
+    fetch(url, {
+        method: method,
         headers: {
             'Content-Type': 'application/json',
         },
@@ -496,16 +507,16 @@ function saveToner() {
     .then(response => response.json())
     .then(result => {
         if (result.success) {
-            alert('Toner cadastrado com sucesso!');
+            alert(isEditing ? 'Toner atualizado com sucesso!' : 'Toner cadastrado com sucesso!');
             closeTonerModal();
             loadToners();
         } else {
-            alert('Erro ao cadastrar: ' + result.message);
+            alert('Erro ao ' + (isEditing ? 'atualizar' : 'cadastrar') + ': ' + result.message);
         }
     })
     .catch(error => {
         console.error('Erro:', error);
-        alert('Erro ao cadastrar toner');
+        alert('Erro ao ' + (isEditing ? 'atualizar' : 'cadastrar') + ' toner');
     });
 }
 
@@ -575,8 +586,34 @@ function loadReturns() {
 }
 
 function editToner(id) {
-    // TODO: Implementar edição
-    alert('Edição será implementada');
+    const toner = toners.find(t => t.id == id);
+    if (!toner) {
+        alert('Toner não encontrado');
+        return;
+    }
+    
+    editingTonerId = id;
+    
+    // Atualizar título e botão do modal
+    document.getElementById('modal-title').textContent = 'Editar Toner';
+    document.getElementById('submit-text').textContent = 'Atualizar Toner';
+    document.getElementById('submit-icon').className = 'fas fa-edit mr-2';
+    
+    // Preencher campos com dados do toner
+    document.getElementById('toner-id').value = toner.id;
+    document.getElementById('modelo').value = toner.modelo;
+    document.getElementById('cor').value = toner.cor;
+    document.getElementById('tipo').value = toner.tipo;
+    document.getElementById('capacidade').value = toner.capacidade;
+    document.getElementById('peso_cheio').value = toner.peso_cheio;
+    document.getElementById('peso_vazio').value = toner.peso_vazio;
+    document.getElementById('preco').value = toner.preco;
+    
+    // Calcular valores automaticamente
+    calculateValues();
+    
+    // Abrir modal
+    document.getElementById('toner-modal').classList.remove('hidden');
 }
 
 function deleteToner(id) {
