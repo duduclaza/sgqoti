@@ -785,14 +785,19 @@ function handleLogoUpload(input, type) {
     const imgSrc = e.target.result;
     
     // Update preview image
-    document.getElementById(type + '-logo-preview').src = imgSrc;
-    document.getElementById(type + '-logo-preview').style.display = 'block';
+    const previewImg = document.getElementById(type + '-logo-preview');
+    if (previewImg) {
+      previewImg.src = imgSrc;
+      previewImg.style.display = 'block';
+    }
     
     // Update preview sections
     if (type === 'menu') {
-      document.getElementById('preview-menu-logo').src = imgSrc;
-    } else {
-      document.getElementById('preview-login-logo').src = imgSrc;
+      const menuLogo = document.getElementById('preview-menu-logo');
+      if (menuLogo) menuLogo.src = imgSrc;
+    } else if (type === 'login') {
+      const loginLogo = document.getElementById('preview-login-logo');
+      if (loginLogo) loginLogo.src = imgSrc;
     }
     
     // Upload to server
@@ -816,10 +821,59 @@ function uploadLogoToServer(file, type) {
     if (result.success) {
       console.log('Logo uploaded successfully');
       alert('Logo enviado com sucesso!');
-      // Recarregar logos
+      
+      // Recarregar logos na lista
       if (typeof loadLogos === 'function') {
         loadLogos();
       }
+      
+      // Atualizar logo no sistema principal (sidebar/login) se necessário
+      if (type === 'sidebar') {
+        // Tentar atualizar logo no sidebar da página principal
+        try {
+          const sidebarLogo = window.parent.document?.getElementById('sidebar-logo') || 
+                              window.top.document?.getElementById('sidebar-logo') ||
+                              document.getElementById('sidebar-logo');
+          
+          if (sidebarLogo) {
+            const timestamp = new Date().getTime();
+            sidebarLogo.src = result.url + '&t=' + timestamp;
+            sidebarLogo.style.display = 'block';
+            
+            // Esconder fallback se existir
+            const logoFallback = window.parent.document?.getElementById('logo-fallback') || 
+                                window.top.document?.getElementById('logo-fallback') ||
+                                document.getElementById('logo-fallback');
+            if (logoFallback) logoFallback.style.display = 'none';
+          }
+        } catch (e) {
+          console.log('Não foi possível atualizar logo do sidebar automaticamente');
+        }
+        
+        // Sugerir reload da página
+        setTimeout(() => {
+          if (confirm('Logo enviado com sucesso! Deseja recarregar a página para ver as alterações no menu lateral?')) {
+            window.top.location.reload();
+          }
+        }, 1000);
+      }
+      
+      // Atualizar preview com URL do servidor
+      const timestamp = new Date().getTime();
+      const previewImg = document.getElementById(type + '-logo-preview');
+      if (previewImg) {
+        previewImg.src = result.url + '&t=' + timestamp;
+      }
+      
+      // Atualizar preview sections
+      if (type === 'menu') {
+        const menuLogo = document.getElementById('preview-menu-logo');
+        if (menuLogo) menuLogo.src = result.url + '&t=' + timestamp;
+      } else if (type === 'login') {
+        const loginLogo = document.getElementById('preview-login-logo');
+        if (loginLogo) loginLogo.src = result.url + '&t=' + timestamp;
+      }
+      
     } else {
       alert('Erro ao fazer upload: ' + result.error);
     }

@@ -1333,6 +1333,10 @@ $module = $_GET['module'] ?? 'dashboard';
       const logoFallback = document.getElementById('logo-fallback');
       
       if (logoImg) {
+        // Adicionar timestamp para evitar cache
+        const timestamp = new Date().getTime();
+        logoImg.src = logoImg.src + '&t=' + timestamp;
+        
         logoImg.onload = function() {
           logoImg.style.display = 'block';
           if (logoFallback) logoFallback.style.display = 'none';
@@ -1342,6 +1346,9 @@ $module = $_GET['module'] ?? 'dashboard';
           logoImg.style.display = 'none';
           if (logoFallback) logoFallback.style.display = 'block';
         };
+        
+        // Forçar reload da imagem
+        logoImg.src = logoImg.src;
       }
     });
   </script>
