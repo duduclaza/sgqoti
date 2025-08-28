@@ -21,6 +21,115 @@
         </div>
     </div>
 
+<!-- Modal de Registro de Retorno -->
+<div id="return-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-[9999]">
+    <div class="flex items-center justify-center min-h-screen p-2 sm:p-4 lg:p-6">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl lg:max-w-3xl max-h-[90vh] overflow-y-auto relative z-[10000]">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Registro de Retornados</h3>
+                    <button onclick="closeReturnModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <form id="return-form" class="space-y-5" oninput="onReturnInputChanged()" onsubmit="event.preventDefault(); submitReturn();">
+                    <input type="hidden" id="return-destino" value="">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Selecione um Modelo *</label>
+                            <select id="return-toner" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" required onchange="onReturnInputChanged()">
+                                <option value="">Carregando...</option>
+                            </select>
+                            <small class="text-xs text-gray-500">Modelos cadastrados em toners</small>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Código do Cliente *</label>
+                            <input id="return-cliente-codigo" type="text" class="w-full px-3 py-2 border rounded-lg" required placeholder="Ex.: CL12345">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente (opcional)</label>
+                            <input id="return-cliente-nome" type="text" class="w-full px-3 py-2 border rounded-lg" placeholder="Ex.: João da Silva">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Filial *</label>
+                            <input id="return-filial" list="filiais-datalist" type="text" class="w-full px-3 py-2 border rounded-lg" required placeholder="Ex.: Matriz">
+                            <datalist id="filiais-datalist"></datalist>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <label class="block text-sm font-semibold text-gray-800 mb-3">Modo de Registro</label>
+                        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+                            <label class="inline-flex items-center gap-2">
+                                <input type="radio" name="return-modo" value="peso" checked onchange="toggleReturnMode(); onReturnInputChanged()">
+                                <span class="text-sm">Por Peso</span>
+                            </label>
+                            <label class="inline-flex items-center gap-2">
+                                <input type="radio" name="return-modo" value="percent" onchange="toggleReturnMode(); onReturnInputChanged()">
+                                <span class="text-sm">Por %</span>
+                            </label>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                            <div id="campo-peso" class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Peso do Retornado (g) *</label>
+                                <input id="return-peso" type="number" step="0.1" min="0" class="w-full px-3 py-2 border rounded-lg" placeholder="Ex.: 350">
+                            </div>
+                            <div id="campo-percent" class="md:col-span-1 hidden">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">% do Retornado *</label>
+                                <input id="return-percent" type="number" step="0.01" min="0" max="100" class="w-full px-3 py-2 border rounded-lg" placeholder="Ex.: 62.5">
+                            </div>
+                            <div class="md:col-span-1">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">% Calculada/Informada</label>
+                                <div class="px-3 py-2 border rounded-lg bg-white font-semibold text-gray-800" id="percentual-display">0%</div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Orientação</label>
+                            <div class="px-3 py-2 border rounded-lg bg-yellow-50 text-yellow-800" id="orientacao-text"></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-800 mb-2">Selecione o Destino</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <button type="button" class="destino-btn border rounded-lg px-3 py-2 hover:bg-gray-50" data-destino="descarte" onclick="setDestino('descarte')">
+                                <span class="block text-sm font-semibold text-red-700">Descarte</span>
+                                <small class="text-xs text-gray-500">Registro simples</small>
+                            </button>
+                            <button type="button" class="destino-btn border rounded-lg px-3 py-2 hover:bg-gray-50" data-destino="uso_interno" onclick="setDestino('uso_interno')">
+                                <span class="block text-sm font-semibold text-blue-700">Uso Interno</span>
+                                <small class="text-xs text-gray-500">Registro simples</small>
+                            </button>
+                            <button type="button" class="destino-btn border rounded-lg px-3 py-2 hover:bg-gray-50" data-destino="garantia" onclick="setDestino('garantia')">
+                                <span class="block text-sm font-semibold text-yellow-700">Garantia</span>
+                                <small class="text-xs text-gray-500">Registro simples</small>
+                            </button>
+                            <button type="button" class="destino-btn border rounded-lg px-3 py-2 hover:bg-gray-50" data-destino="estoque" onclick="setDestino('estoque')">
+                                <span class="block text-sm font-semibold text-green-700">Estoque</span>
+                                <small class="text-xs text-gray-500">Calcula valor recuperado</small>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Observações (opcional)</label>
+                        <textarea id="return-observacoes" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="Detalhes adicionais..."></textarea>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t mt-2">
+                        <button type="button" onclick="closeReturnModal()" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg">Cancelar</button>
+                        <button id="return-register-btn" type="submit" disabled class="px-5 py-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg">
+                            <i class="fas fa-check mr-2"></i><span id="return-register-text">Registrar Toner</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+</div>
+
     <!-- Conteúdo das Abas -->
     <div id="content-cadastro" class="tab-content">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -66,12 +175,21 @@
 
     <div id="content-retornados" class="tab-content hidden">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
                 <h3 class="text-lg font-semibold text-gray-800">Registro de Retornados</h3>
-                <button onclick="openReturnModal()" 
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                    <i class="fas fa-undo mr-2"></i>Registrar Retorno
-                </button>
+                <div class="flex flex-col sm:flex-row gap-2 sm:items-center">
+                    <div class="flex items-center gap-2">
+                        <input type="date" id="filter-start" class="border rounded px-2 py-1 text-sm" />
+                        <span class="text-gray-400">→</span>
+                        <input type="date" id="filter-end" class="border rounded px-2 py-1 text-sm" />
+                    </div>
+                    <input type="text" id="returns-search" placeholder="Buscar (modelo, cliente, filial)" class="border rounded px-3 py-1.5 text-sm w-full sm:w-64" oninput="loadReturns()" />
+                    <button onclick="exportReturns()" class="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg text-sm font-medium"><i class="fas fa-file-export mr-2"></i>Exportar</button>
+                    <button onclick="openReturnModal()" 
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-undo mr-2"></i>Registrar Retorno
+                    </button>
+                </div>
             </div>
             
             <!-- Grid de Retornados -->
@@ -79,11 +197,14 @@
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data Retorno</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Data</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso Retornado</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% Utilizado</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modo</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Peso (g)</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% Presente</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Destino</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                         </tr>
                     </thead>
@@ -510,6 +631,8 @@
 let currentTab = 'cadastro';
 let toners = [];
 let editingTonerId = null;
+let returnsData = [];
+let editingReturnId = null;
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
@@ -557,9 +680,148 @@ function closeTonerModal() {
     document.getElementById('toner-modal').classList.add('hidden');
 }
 
-function openReturnModal() {
-    // TODO: Implementar modal de retorno
-    alert('Modal de retorno será implementado');
+function openReturnModal(existing = null) {
+    editingReturnId = existing ? existing.id : null;
+    // Reset
+    document.getElementById('return-form').reset();
+    document.getElementById('return-register-btn').disabled = true;
+    document.querySelectorAll('.destino-btn').forEach(b=>b.classList.remove('ring-2','ring-offset-2','ring-green-500'));
+    document.getElementById('return-destino').value = '';
+    document.getElementById('percentual-display').textContent = '0%';
+    document.getElementById('orientacao-text').textContent = '';
+    // Popular modelos
+    const sel = document.getElementById('return-toner');
+    sel.innerHTML = '<option value="">Selecione...</option>' + toners.map(t=>`<option value="${t.id}">${t.modelo} (${t.cor} • ${t.tipo})</option>`).join('');
+    // Popular filiais (datalist) usando valores já registrados
+    const dl = document.getElementById('filiais-datalist');
+    const unique = [...new Set(returnsData.map(r=>r.filial).filter(Boolean))];
+    dl.innerHTML = unique.map(f=>`<option value="${f}"></option>`).join('');
+    // Se edição, preencher
+    if (existing){
+        sel.value = existing.toner_id;
+        document.getElementById('return-cliente-codigo').value = existing.cliente_codigo;
+        document.getElementById('return-cliente-nome').value = existing.cliente_nome || '';
+        document.getElementById('return-filial').value = existing.filial;
+        document.querySelector(`input[name="return-modo"][value="${existing.modo}"]`).checked = true;
+        toggleReturnMode();
+        if (existing.modo==='peso') document.getElementById('return-peso').value = existing.peso_retornado || '';
+        if (existing.modo==='percent') document.getElementById('return-percent').value = existing.percentual;
+        document.getElementById('percentual-display').textContent = `${Number(existing.percentual).toFixed(2)}%`;
+        document.getElementById('orientacao-text').textContent = getOrientation(Number(existing.percentual));
+        setDestino(existing.destino);
+        document.getElementById('return-observacoes').value = existing.observacoes || '';
+        document.getElementById('return-register-text').textContent = 'Salvar Alterações';
+    } else {
+        document.querySelector('input[name="return-modo"][value="peso"]').checked = true;
+        toggleReturnMode();
+        document.getElementById('return-register-text').textContent = 'Registrar Toner';
+    }
+    document.getElementById('return-modal').classList.remove('hidden');
+}
+
+function closeReturnModal(){
+    document.getElementById('return-modal').classList.add('hidden');
+}
+
+function toggleReturnMode(){
+    const mode = document.querySelector('input[name="return-modo"]:checked').value;
+    document.getElementById('campo-peso').classList.toggle('hidden', mode!== 'peso');
+    document.getElementById('campo-percent').classList.toggle('hidden', mode!== 'percent');
+}
+
+function onReturnInputChanged(){
+    const tonerId = Number(document.getElementById('return-toner').value);
+    const mode = document.querySelector('input[name="return-modo"]:checked').value;
+    let percent = 0;
+    const t = toners.find(x=>x.id==tonerId);
+    if (t){
+        if (mode==='peso'){
+            const peso = parseFloat(document.getElementById('return-peso').value)||0;
+            const pesoVazio = parseFloat(t.peso_vazio)||0;
+            const gramatura = parseFloat(t.gramatura)||0;
+            const presente = Math.max(0, peso - pesoVazio);
+            percent = gramatura>0 ? (presente/gramatura)*100 : 0;
+        } else {
+            percent = parseFloat(document.getElementById('return-percent').value)||0;
+        }
+    }
+    percent = Math.max(0, Math.min(100, percent));
+    document.getElementById('percentual-display').textContent = `${percent.toFixed(2)}%`;
+    document.getElementById('orientacao-text').textContent = getOrientation(percent);
+    // Habilitar registrar somente quando destino estiver escolhido e campos obrigatórios preenchidos
+    validateReturnForm();
+}
+
+function getOrientation(p){
+    if (p <= 5) return 'Descarte o toner.';
+    if (p <= 40) return 'Teste o toner se estiver com qualidade boa use internamente se não descarte o toner.';
+    if (p <= 80) return 'Teste o toner se estiver com qualidade boa envie para o estoque como semi novo e com % descrita na caixa e envie para a garantia.';
+    return 'Teste o toner se estiver com qualidade boa envie para o estoque como novo se não envie para garantia.';
+}
+
+function setDestino(dest){
+    document.getElementById('return-destino').value = dest;
+    document.querySelectorAll('.destino-btn').forEach(b=>{
+        if (b.dataset.destino===dest){ b.classList.add('ring-2','ring-offset-2','ring-green-500'); }
+        else { b.classList.remove('ring-2','ring-offset-2','ring-green-500'); }
+    });
+    validateReturnForm();
+}
+
+function validateReturnForm(){
+    const tonerId = document.getElementById('return-toner').value;
+    const clienteCodigo = document.getElementById('return-cliente-codigo').value.trim();
+    const filial = document.getElementById('return-filial').value.trim();
+    const dest = document.getElementById('return-destino').value;
+    const mode = document.querySelector('input[name="return-modo"]:checked').value;
+    let okCampos = !!(tonerId && clienteCodigo && filial && dest);
+    if (mode==='peso') okCampos = okCampos && !!document.getElementById('return-peso').value;
+    if (mode==='percent') okCampos = okCampos && !!document.getElementById('return-percent').value;
+    document.getElementById('return-register-btn').disabled = !okCampos;
+}
+
+function submitReturn(){
+    const tonerId = Number(document.getElementById('return-toner').value);
+    const clienteCodigo = document.getElementById('return-cliente-codigo').value.trim();
+    const clienteNome = document.getElementById('return-cliente-nome').value.trim();
+    const filial = document.getElementById('return-filial').value.trim();
+    const mode = document.querySelector('input[name="return-modo"]:checked').value;
+    const peso = document.getElementById('return-peso').value;
+    const percent = document.getElementById('return-percent').value;
+    const destino = document.getElementById('return-destino').value;
+    const observacoes = document.getElementById('return-observacoes').value.trim();
+
+    const payload = {
+        toner_id: tonerId,
+        cliente_codigo: clienteCodigo,
+        cliente_nome: clienteNome,
+        filial: filial,
+        modo: mode,
+        destino: destino,
+        observacoes: observacoes
+    };
+    if (mode==='peso') payload.peso_retornado = Number(peso);
+    if (mode==='percent') payload.percentual = Number(percent);
+
+    const url = editingReturnId ? `backend/api/returns.php?id=${editingReturnId}` : 'backend/api/returns.php';
+    const method = editingReturnId ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    }).then(r=>r.json()).then(res=>{
+        if (res.success){
+            alert(editingReturnId ? 'Registro atualizado!' : 'Retorno registrado!');
+            closeReturnModal();
+            loadReturns();
+        } else {
+            alert('Erro: ' + (res.message || JSON.stringify(res)));
+        }
+    }).catch(err=>{
+        console.error(err);
+        alert('Erro ao enviar retorno');
+    });
 }
 
 // Cálculos automáticos
@@ -695,8 +957,69 @@ function getColorClass(cor) {
 }
 
 function loadReturns() {
-    // TODO: Implementar carregamento de retornos
-    console.log('Carregando retornos...');
+    const params = new URLSearchParams();
+    const q = document.getElementById('returns-search')?.value.trim();
+    const start = document.getElementById('filter-start')?.value;
+    const end = document.getElementById('filter-end')?.value;
+    if (q) params.set('q', q);
+    if (start) params.set('start', start);
+    if (end) params.set('end', end);
+    const url = params.toString() ? `backend/api/returns.php?${params.toString()}` : 'backend/api/returns.php';
+    fetch(url).then(r=>r.json()).then(data=>{
+        returnsData = Array.isArray(data) ? data : [];
+        renderReturnsGrid();
+    }).catch(err=>console.error('Erro ao carregar retornos', err));
+}
+
+function renderReturnsGrid(){
+    const tbody = document.getElementById('returns-tbody');
+    if (!tbody) return;
+    if (!returnsData.length){
+        tbody.innerHTML = `<tr><td colspan="9" class="px-6 py-4 text-center text-gray-500">Nenhum retorno registrado</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = returnsData.map(r=>{
+        const badge = r.destino === 'descarte' ? 'bg-red-100 text-red-800' : r.destino==='estoque' ? 'bg-green-100 text-green-800' : r.destino==='garantia' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800';
+        return `
+        <tr class="hover:bg-gray-50">
+            <td class="px-6 py-3 text-sm text-gray-700">${new Date(r.created_at).toLocaleString()}</td>
+            <td class="px-6 py-3 text-sm font-medium text-gray-900">${r.modelo}</td>
+            <td class="px-6 py-3 text-sm text-gray-700">${r.cliente_codigo} ${r.cliente_nome?('- '+r.cliente_nome):''}</td>
+            <td class="px-6 py-3 text-sm text-gray-700">${r.filial}</td>
+            <td class="px-6 py-3 text-sm text-gray-700">${r.modo==='peso'?'Peso':'%'} </td>
+            <td class="px-6 py-3 text-sm text-gray-700">${r.peso_retornado ?? '-'}</td>
+            <td class="px-6 py-3 text-sm text-gray-700">${Number(r.percentual||0).toFixed(2)}%</td>
+            <td class="px-6 py-3 text-sm"><span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${badge}">${r.destino}</span></td>
+            <td class="px-6 py-3 text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick='handleEditReturn(${JSON.stringify(r).replace(/'/g,"&apos;")})'>Editar</button>
+                <button class="text-red-600 hover:text-red-900" onclick="handleDeleteReturn(${r.id})">Excluir</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function handleEditReturn(r){
+    openReturnModal(r);
+}
+
+function handleDeleteReturn(id){
+    if (!confirm('Deseja excluir este registro?')) return;
+    fetch(`backend/api/returns.php?id=${id}`, { method: 'DELETE' }).then(r=>r.json()).then(res=>{
+        if (res.success){ loadReturns(); }
+        else alert('Erro ao excluir');
+    }).catch(()=>alert('Erro ao excluir'));
+}
+
+function exportReturns(){
+    const start = document.getElementById('filter-start')?.value;
+    const end = document.getElementById('filter-end')?.value;
+    const params = new URLSearchParams();
+    if (start) params.set('start', start);
+    if (end) params.set('end', end);
+    const a = document.createElement('a');
+    a.href = `backend/api/export-returns.php${params.toString()?('?'+params.toString()):''}`;
+    a.style.display='none';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
 }
 
 function editToner(id) {
