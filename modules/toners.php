@@ -223,11 +223,11 @@
                             <div class="flex-1">
                                 <h4 class="text-sm font-semibold text-blue-900 mb-2">1. Baixar Planilha Exemplo</h4>
                                 <p class="text-sm text-blue-700 mb-3">
-                                    Baixe a planilha Excel formatada com colunas organizadas e exemplos para preenchimento.
+                                    Baixe a planilha CSV formatada para Excel com exemplos e instruções de preenchimento.
                                 </p>
                                 <button onclick="downloadExampleSpreadsheet()" 
                                         class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                                    <i class="fas fa-file-excel mr-2"></i>Baixar Planilha Excel
+                                    <i class="fas fa-file-csv mr-2"></i>Baixar Planilha CSV
                                 </button>
                             </div>
                         </div>
@@ -613,10 +613,10 @@ function closeImportModal() {
 }
 
 function downloadExampleSpreadsheet() {
-    // Baixar planilha Excel formatada do backend
+    // Baixar planilha CSV formatada do backend
     const link = document.createElement('a');
     link.href = 'backend/api/download-example.php';
-    link.download = 'exemplo_toners.xlsx';
+    link.download = 'exemplo_toners.csv';
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();

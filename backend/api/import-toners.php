@@ -185,8 +185,10 @@ function processCSV($filePath) {
                         $rowData[$headers[$i]] = trim($row[$i]);
                     }
                     
-                    // Pular linhas vazias
-                    if (!empty(array_filter($rowData))) {
+                    // Pular linhas vazias, linhas de exemplo e separadores
+                    if (!empty(array_filter($rowData)) && 
+                        !in_array($rowData['modelo'] ?? '', ['HP CF280A', 'HP CE285A', 'Canon 728', 'HP CF541A']) &&
+                        !str_contains($rowData['modelo'] ?? '', '===')) {
                         $data[] = $rowData;
                     }
                 }
@@ -277,9 +279,10 @@ function processXLSX($filePath) {
                                 $rowData[$headers[$i]] = trim($row[$i]);
                             }
                             
-                            // Pular linhas vazias e linhas de exemplo
+                            // Pular linhas vazias, linhas de exemplo e separadores
                             if (!empty(array_filter($rowData)) && 
-                                !in_array($rowData['modelo'] ?? '', ['HP CF280A', 'HP CE285A', 'Canon 728', 'HP CF541A'])) {
+                                !in_array($rowData['modelo'] ?? '', ['HP CF280A', 'HP CE285A', 'Canon 728', 'HP CF541A']) &&
+                                !str_contains($rowData['modelo'] ?? '', '===')) {
                                 $data[] = $rowData;
                             }
                         }
