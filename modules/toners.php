@@ -17,6 +17,10 @@
                         class="tab-button py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">
                     Registro de Retornados
                 </button>
+                <button onclick="switchTab('config')" id="tab-config" 
+                        class="tab-button py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 font-medium text-sm">
+                    Configurações
+                </button>
             </nav>
         </div>
     </div>
@@ -48,13 +52,10 @@
                             <input id="return-cliente-codigo" type="text" class="w-full px-3 py-2 border rounded-lg" required placeholder="Ex.: CL12345">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Cliente (opcional)</label>
-                            <input id="return-cliente-nome" type="text" class="w-full px-3 py-2 border rounded-lg" placeholder="Ex.: João da Silva">
-                        </div>
-                        <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Filial *</label>
-                            <input id="return-filial" list="filiais-datalist" type="text" class="w-full px-3 py-2 border rounded-lg" required placeholder="Ex.: Matriz">
-                            <datalist id="filiais-datalist"></datalist>
+                            <select id="return-filial-select" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" required>
+                                <option value="">Selecione...</option>
+                            </select>
                         </div>
                     </div>
 
@@ -86,7 +87,7 @@
                         </div>
                         <div class="mt-3">
                             <label class="block text-sm font-medium text-gray-700 mb-1">Orientação</label>
-                            <div class="px-3 py-2 border rounded-lg bg-yellow-50 text-yellow-800" id="orientacao-text"></div>
+                            <div id="orientacao-text" class="px-3 py-2 border rounded-lg text-sm font-medium">Informe peso ou % para orientar</div>
                         </div>
                     </div>
 
@@ -211,6 +212,29 @@
                     <tbody id="returns-tbody" class="bg-white divide-y divide-gray-200">
                         <!-- Dados serão carregados via JavaScript -->
                     </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="content-config" class="tab-content hidden">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">Cadastro de Filiais</h3>
+            <form class="flex flex-col sm:flex-row gap-3 mb-6" onsubmit="event.preventDefault(); saveBranch();">
+                <input type="hidden" id="branch-id" value="">
+                <input id="branch-name" type="text" placeholder="Nome da filial" class="flex-1 border rounded px-3 py-2" required>
+                <button id="branch-submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium">
+                    <i class="fas fa-save mr-2"></i><span id="branch-submit-text">Adicionar</span>
+                </button>
+            </form>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Filial</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="branches-tbody" class="bg-white divide-y divide-gray-200"></tbody>
                 </table>
             </div>
         </div>
@@ -633,10 +657,13 @@ let toners = [];
 let editingTonerId = null;
 let returnsData = [];
 let editingReturnId = null;
+let branches = [];
+let editingBranchId = null;
 
 // Inicialização
 document.addEventListener('DOMContentLoaded', function() {
     loadToners();
+    loadBranches();
 });
 
 // Funções de navegação entre abas
@@ -688,26 +715,24 @@ function openReturnModal(existing = null) {
     document.querySelectorAll('.destino-btn').forEach(b=>b.classList.remove('ring-2','ring-offset-2','ring-green-500'));
     document.getElementById('return-destino').value = '';
     document.getElementById('percentual-display').textContent = '0%';
-    document.getElementById('orientacao-text').textContent = '';
+    updateOrientationUI(0);
     // Popular modelos
     const sel = document.getElementById('return-toner');
     sel.innerHTML = '<option value="">Selecione...</option>' + toners.map(t=>`<option value="${t.id}">${t.modelo} (${t.cor} • ${t.tipo})</option>`).join('');
-    // Popular filiais (datalist) usando valores já registrados
-    const dl = document.getElementById('filiais-datalist');
-    const unique = [...new Set(returnsData.map(r=>r.filial).filter(Boolean))];
-    dl.innerHTML = unique.map(f=>`<option value="${f}"></option>`).join('');
+    // Popular filiais via API (branches)
+    const filSel = document.getElementById('return-filial-select');
+    filSel.innerHTML = '<option value="">Selecione...</option>' + branches.map(b=>`<option value="${b.nome}">${b.nome}</option>`).join('');
     // Se edição, preencher
     if (existing){
         sel.value = existing.toner_id;
         document.getElementById('return-cliente-codigo').value = existing.cliente_codigo;
-        document.getElementById('return-cliente-nome').value = existing.cliente_nome || '';
-        document.getElementById('return-filial').value = existing.filial;
+        document.getElementById('return-filial-select').value = existing.filial;
         document.querySelector(`input[name="return-modo"][value="${existing.modo}"]`).checked = true;
         toggleReturnMode();
         if (existing.modo==='peso') document.getElementById('return-peso').value = existing.peso_retornado || '';
         if (existing.modo==='percent') document.getElementById('return-percent').value = existing.percentual;
         document.getElementById('percentual-display').textContent = `${Number(existing.percentual).toFixed(2)}%`;
-        document.getElementById('orientacao-text').textContent = getOrientation(Number(existing.percentual));
+        updateOrientationUI(Number(existing.percentual));
         setDestino(existing.destino);
         document.getElementById('return-observacoes').value = existing.observacoes || '';
         document.getElementById('return-register-text').textContent = 'Salvar Alterações';
@@ -747,7 +772,7 @@ function onReturnInputChanged(){
     }
     percent = Math.max(0, Math.min(100, percent));
     document.getElementById('percentual-display').textContent = `${percent.toFixed(2)}%`;
-    document.getElementById('orientacao-text').textContent = getOrientation(percent);
+    updateOrientationUI(percent);
     // Habilitar registrar somente quando destino estiver escolhido e campos obrigatórios preenchidos
     validateReturnForm();
 }
@@ -757,6 +782,20 @@ function getOrientation(p){
     if (p <= 40) return 'Teste o toner se estiver com qualidade boa use internamente se não descarte o toner.';
     if (p <= 80) return 'Teste o toner se estiver com qualidade boa envie para o estoque como semi novo e com % descrita na caixa e envie para a garantia.';
     return 'Teste o toner se estiver com qualidade boa envie para o estoque como novo se não envie para garantia.';
+}
+
+function getOrientationClass(p){
+    if (p <= 5) return 'bg-red-100 text-red-800 border-red-200';
+    if (p <= 40) return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    if (p <= 80) return 'bg-blue-100 text-blue-800 border-blue-200';
+    return 'bg-green-100 text-green-800 border-green-200';
+}
+
+function updateOrientationUI(p){
+    const el = document.getElementById('orientacao-text');
+    const txt = p>0 ? getOrientation(p) : 'Informe peso ou % para orientar';
+    el.textContent = txt;
+    el.className = `px-3 py-2 border rounded-lg text-sm font-medium ${getOrientationClass(p)}`;
 }
 
 function setDestino(dest){
@@ -771,7 +810,7 @@ function setDestino(dest){
 function validateReturnForm(){
     const tonerId = document.getElementById('return-toner').value;
     const clienteCodigo = document.getElementById('return-cliente-codigo').value.trim();
-    const filial = document.getElementById('return-filial').value.trim();
+    const filial = document.getElementById('return-filial-select').value.trim();
     const dest = document.getElementById('return-destino').value;
     const mode = document.querySelector('input[name="return-modo"]:checked').value;
     let okCampos = !!(tonerId && clienteCodigo && filial && dest);
@@ -783,8 +822,7 @@ function validateReturnForm(){
 function submitReturn(){
     const tonerId = Number(document.getElementById('return-toner').value);
     const clienteCodigo = document.getElementById('return-cliente-codigo').value.trim();
-    const clienteNome = document.getElementById('return-cliente-nome').value.trim();
-    const filial = document.getElementById('return-filial').value.trim();
+    const filial = document.getElementById('return-filial-select').value.trim();
     const mode = document.querySelector('input[name="return-modo"]:checked').value;
     const peso = document.getElementById('return-peso').value;
     const percent = document.getElementById('return-percent').value;
@@ -794,7 +832,6 @@ function submitReturn(){
     const payload = {
         toner_id: tonerId,
         cliente_codigo: clienteCodigo,
-        cliente_nome: clienteNome,
         filial: filial,
         modo: mode,
         destino: destino,
@@ -822,6 +859,63 @@ function submitReturn(){
         console.error(err);
         alert('Erro ao enviar retorno');
     });
+}
+
+// Filiais (Branches)
+function loadBranches(){
+    fetch('backend/api/branches.php').then(r=>r.json()).then(res=>{
+        if (res.success){ branches = res.data || []; renderBranchesGrid(); }
+    }).catch(err=>console.error('Erro ao carregar filiais', err));
+}
+
+function renderBranchesGrid(){
+    const tbody = document.getElementById('branches-tbody');
+    if (!tbody) return;
+    if (!branches.length){
+        tbody.innerHTML = `<tr><td colspan="2" class="px-6 py-4 text-center text-gray-500">Nenhuma filial cadastrada</td></tr>`;
+        return;
+    }
+    tbody.innerHTML = branches.map(b=>`
+        <tr class="hover:bg-gray-50">
+            <td class="px-6 py-3 text-sm text-gray-700">${b.nome}</td>
+            <td class="px-6 py-3 text-sm font-medium">
+                <button class="text-blue-600 hover:text-blue-900 mr-3" onclick="startEditBranch(${b.id})">Editar</button>
+                <button class="text-red-600 hover:text-red-900" onclick="deleteBranch(${b.id})">Excluir</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function saveBranch(){
+    const id = editingBranchId;
+    const nome = document.getElementById('branch-name').value.trim();
+    if (!nome) return;
+    const url = id ? `backend/api/branches.php?id=${id}` : 'backend/api/branches.php';
+    const method = id ? 'PUT' : 'POST';
+    fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify({ nome }) })
+    .then(r=>r.json()).then(res=>{
+        if (res.success){
+            document.getElementById('branch-name').value='';
+            editingBranchId = null;
+            document.getElementById('branch-submit-text').textContent = 'Adicionar';
+            loadBranches();
+        } else { alert('Erro ao salvar filial'); }
+    }).catch(()=>alert('Erro ao salvar filial'));
+}
+
+function startEditBranch(id){
+    const b = branches.find(x=>x.id==id); if (!b) return;
+    editingBranchId = id;
+    document.getElementById('branch-name').value = b.nome;
+    document.getElementById('branch-submit-text').textContent = 'Salvar';
+}
+
+function deleteBranch(id){
+    if (!confirm('Excluir filial?')) return;
+    fetch(`backend/api/branches.php?id=${id}`, { method:'DELETE' }).then(r=>r.json()).then(res=>{
+        if (res.success){ loadBranches(); }
+        else alert('Erro ao excluir filial');
+    }).catch(()=>alert('Erro ao excluir filial'));
 }
 
 // Cálculos automáticos
