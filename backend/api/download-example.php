@@ -84,7 +84,7 @@ if ($zip->open($tempFile, ZipArchive::CREATE) === TRUE) {
 
     // xl/sharedStrings.xml
     $sharedStrings = [
-        'Modelo do Toner', 'Cor', 'Tipo', 'Capacidade (páginas)', 'Peso Cheio (g)', 'Peso Vazio (g)', 'Preço (R$)',
+        'Modelo', 'Cor', 'Tipo', 'Capacidade (páginas)', 'Peso Cheio (g)', 'Peso Vazio (g)', 'Preço (R$)',
         'HP CF280A', 'Black', 'Original', 'HP CE285A', 'Compatível', 'Canon 728', 'Remanufaturado', 'Cyan',
         '🔹 INSTRUÇÕES DE PREENCHIMENTO', 
         '1. MODELO: Digite o código exato do toner (ex: HP CF280A, Canon 728)',
@@ -122,13 +122,13 @@ if ($zip->open($tempFile, ZipArchive::CREATE) === TRUE) {
 <worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
   <sheetData>
     <row r="1">
-      <c r="A1" s="1" t="inlineStr"><is><t>Modelo do Toner</t></is></c>
-      <c r="B1" s="1" t="inlineStr"><is><t>Cor</t></is></c>
-      <c r="C1" s="1" t="inlineStr"><is><t>Tipo</t></is></c>
-      <c r="D1" s="1" t="inlineStr"><is><t>Capacidade (páginas)</t></is></c>
-      <c r="E1" s="1" t="inlineStr"><is><t>Peso Cheio (g)</t></is></c>
-      <c r="F1" s="1" t="inlineStr"><is><t>Peso Vazio (g)</t></is></c>
-      <c r="G1" s="1" t="inlineStr"><is><t>Preço (R$)</t></is></c>
+      <c r="A1" s="1" t="s"><v>0</v></c>
+      <c r="B1" s="1" t="s"><v>1</v></c>
+      <c r="C1" s="1" t="s"><v>2</v></c>
+      <c r="D1" s="1" t="s"><v>3</v></c>
+      <c r="E1" s="1" t="s"><v>4</v></c>
+      <c r="F1" s="1" t="s"><v>5</v></c>
+      <c r="G1" s="1" t="s"><v>6</v></c>
     </row>
     <row r="2"><c r="A2" s="5"/><c r="B2" s="5"/><c r="C2" s="5"/><c r="D2" s="5"/><c r="E2" s="4"/><c r="F2" s="4"/><c r="G2" s="4"/></row>
     <row r="3"><c r="A3" s="5"/><c r="B3" s="5"/><c r="C3" s="5"/><c r="D3" s="5"/><c r="E3" s="4"/><c r="F3" s="4"/><c r="G3" s="4"/></row>

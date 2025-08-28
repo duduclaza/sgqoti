@@ -226,9 +226,18 @@ function processXLSX($filePath) {
                 $rows = [];
                 foreach ($xml->sheetData->row as $row) {
                     $rowData = [];
+                    $cellIndex = 0;
+                    
+                    // Processar células da linha
                     foreach ($row->c as $cell) {
                         $value = '';
-                        if (isset($cell->v)) {
+                        
+                        // Verificar se há valor inline
+                        if (isset($cell->is->t)) {
+                            $value = (string)$cell->is->t;
+                        }
+                        // Verificar se há valor normal
+                        elseif (isset($cell->v)) {
                             $cellValue = (string)$cell->v;
                             // Se é uma string compartilhada
                             if (isset($cell['t']) && $cell['t'] == 's') {
@@ -237,8 +246,21 @@ function processXLSX($filePath) {
                                 $value = $cellValue;
                             }
                         }
-                        $rowData[] = $value;
+                        
+                        // Converter vírgula para ponto em números
+                        if (is_numeric(str_replace(',', '.', $value))) {
+                            $value = str_replace(',', '.', $value);
+                        }
+                        
+                        $rowData[] = trim($value);
+                        $cellIndex++;
                     }
+                    
+                    // Garantir que temos pelo menos 7 colunas
+                    while (count($rowData) < 7) {
+                        $rowData[] = '';
+                    }
+                    
                     $rows[] = $rowData;
                 }
                 
@@ -250,12 +272,14 @@ function processXLSX($filePath) {
                         $headers = array_map('strtolower', $row);
                         $headers = array_map('trim', $headers);
                         
-                        // Mapear cabeçalhos
+                        // Mapear cabeçalhos para campos esperados
                         $headerMap = [
                             'modelo' => 'modelo',
+                            'modelo do toner' => 'modelo',
                             'cor' => 'cor',
                             'tipo' => 'tipo',
                             'capacidade' => 'capacidade',
+                            'capacidade (páginas)' => 'capacidade',
                             'peso cheio (g)' => 'peso_cheio',
                             'peso cheio' => 'peso_cheio',
                             'peso vazio (g)' => 'peso_vazio',
@@ -272,8 +296,8 @@ function processXLSX($filePath) {
                         $headers = $mappedHeaders;
                         
                     } else {
-                        // Pular linhas de exemplo (cinza) e processar apenas dados reais
-                        if (count($row) >= 7 && !empty(trim($row[0]))) {
+                        // Processar apenas linhas com dados válidos
+                        if (!empty(trim($row[0]))) {
                             $rowData = [];
                             for ($i = 0; $i < count($headers) && $i < count($row); $i++) {
                                 $rowData[$headers[$i]] = trim($row[$i]);
@@ -282,7 +306,20 @@ function processXLSX($filePath) {
                             // Pular linhas vazias, linhas de exemplo e separadores
                             if (!empty(array_filter($rowData)) && 
                                 !in_array($rowData['modelo'] ?? '', ['HP CF280A', 'HP CE285A', 'Canon 728', 'HP CF541A']) &&
-                                !str_contains($rowData['modelo'] ?? '', '===')) {
+                                !str_contains($rowData['modelo'] ?? '', '===') &&
+                                !str_contains($rowData['modelo'] ?? '', 'EXEMPLO')) {
+                                
+                                // Converter vírgulas para pontos nos campos numéricos
+                                if (isset($rowData['peso_cheio'])) {
+                                    $rowData['peso_cheio'] = str_replace(',', '.', $rowData['peso_cheio']);
+                                }
+                                if (isset($rowData['peso_vazio'])) {
+                                    $rowData['peso_vazio'] = str_replace(',', '.', $rowData['peso_vazio']);
+                                }
+                                if (isset($rowData['preco'])) {
+                                    $rowData['preco'] = str_replace(',', '.', $rowData['preco']);
+                                }
+                                
                                 $data[] = $rowData;
                             }
                         }
