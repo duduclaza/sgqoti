@@ -27,6 +27,10 @@
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-lg font-semibold text-gray-800">Cadastro de Toners</h3>
                 <div class="flex space-x-3">
+                    <button onclick="openExportModal()" 
+                            class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                        <i class="fas fa-download mr-2"></i>Exportar
+                    </button>
                     <button onclick="openImportModal()" 
                             class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
                         <i class="fas fa-file-excel mr-2"></i>Importar Planilha
@@ -305,6 +309,108 @@
     </div>
 </div>
 
+<!-- Modal de Exportação -->
+<div id="export-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-[9999]">
+    <div class="flex items-center justify-center min-h-screen p-2 sm:p-4 lg:p-6">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto relative z-[10000]">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Exportar Dados dos Toners</h3>
+                    <button onclick="closeExportModal()" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Seção de Formato -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-file-export text-blue-600 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-semibold text-blue-900 mb-3">Escolha o Formato</h4>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="export-format" value="xlsx" checked 
+                                               class="mr-2 text-blue-600 focus:ring-blue-500">
+                                        <span class="text-sm text-blue-700">
+                                            <i class="fas fa-file-excel mr-2"></i>Excel (.xlsx) - Recomendado
+                                        </span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="export-format" value="csv" 
+                                               class="mr-2 text-blue-600 focus:ring-blue-500">
+                                        <span class="text-sm text-blue-700">
+                                            <i class="fas fa-file-csv mr-2"></i>CSV (.csv) - Compatível
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Seção de Opções -->
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-cog text-green-600 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-sm font-semibold text-green-900 mb-3">Opções de Exportação</h4>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="include-calculated" checked 
+                                               class="mr-2 text-green-600 focus:ring-green-500">
+                                        <span class="text-sm text-green-700">Incluir campos calculados (gramatura, preços por folha)</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="include-dates" checked 
+                                               class="mr-2 text-green-600 focus:ring-green-500">
+                                        <span class="text-sm text-green-700">Incluir datas de criação e atualização</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Informações -->
+                    <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                        <div class="flex items-center space-x-2 text-sm text-gray-600">
+                            <i class="fas fa-info-circle"></i>
+                            <span id="export-info">Exportando <strong id="total-toners">0</strong> toners cadastrados</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Progresso da Exportação -->
+                    <div id="export-progress" class="hidden bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="animate-spin">
+                                <i class="fas fa-spinner text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-yellow-900">Gerando arquivo...</p>
+                                <p class="text-xs text-yellow-700">Aguarde enquanto preparamos a exportação.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-6 border-t mt-6">
+                    <button type="button" onclick="closeExportModal()" 
+                            class="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors">
+                        Cancelar
+                    </button>
+                    <button id="export-btn" onclick="exportToners()" 
+                            class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-medium transition-colors">
+                        <i class="fas fa-download mr-2"></i>Exportar Dados
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .tab-button.active {
     color: #2563eb;
@@ -528,11 +634,19 @@ function loadToners() {
         if (result.success) {
             toners = result.data;
             renderTonersGrid();
+            updateExportInfo();
         }
     })
     .catch(error => {
         console.error('Erro ao carregar toners:', error);
     });
+}
+
+function updateExportInfo() {
+    const totalElement = document.getElementById('total-toners');
+    if (totalElement) {
+        totalElement.textContent = toners.length;
+    }
 }
 
 // Renderizar grid de toners
@@ -761,4 +875,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Funções do modal de exportação
+function openExportModal() {
+    document.getElementById('export-modal').classList.remove('hidden');
+    updateExportInfo();
+}
+
+function closeExportModal() {
+    document.getElementById('export-modal').classList.add('hidden');
+    document.getElementById('export-progress').classList.add('hidden');
+}
+
+function exportToners() {
+    const format = document.querySelector('input[name="export-format"]:checked').value;
+    const includeCalculated = document.getElementById('include-calculated').checked;
+    const includeDates = document.getElementById('include-dates').checked;
+    
+    if (toners.length === 0) {
+        alert('Não há toners para exportar');
+        return;
+    }
+    
+    // Mostrar progresso
+    document.getElementById('export-progress').classList.remove('hidden');
+    document.getElementById('export-btn').disabled = true;
+    
+    // Construir URL com parâmetros
+    const params = new URLSearchParams({
+        format: format,
+        include_calculated: includeCalculated ? '1' : '0',
+        include_dates: includeDates ? '1' : '0'
+    });
+    
+    // Criar link de download
+    const link = document.createElement('a');
+    link.href = `backend/api/export-toners.php?${params.toString()}`;
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    
+    // Simular clique para download
+    link.click();
+    document.body.removeChild(link);
+    
+    // Esconder progresso após um tempo
+    setTimeout(() => {
+        document.getElementById('export-progress').classList.add('hidden');
+        document.getElementById('export-btn').disabled = false;
+        closeExportModal();
+    }, 2000);
+}
 </script>
