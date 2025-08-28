@@ -804,9 +804,10 @@ function handleLogoUpload(input, type) {
 function uploadLogoToServer(file, type) {
   const formData = new FormData();
   formData.append('logo', file);
-  formData.append('type', type);
+  formData.append('tipo', type);
+  formData.append('nome', 'Logo ' + type.charAt(0).toUpperCase() + type.slice(1));
   
-  fetch('backend/api/upload-logo.php', {
+  fetch('backend/api/logos.php', {
     method: 'POST',
     body: formData
   })
@@ -814,12 +815,18 @@ function uploadLogoToServer(file, type) {
   .then(result => {
     if (result.success) {
       console.log('Logo uploaded successfully');
+      alert('Logo enviado com sucesso!');
+      // Recarregar logos
+      if (typeof loadLogos === 'function') {
+        loadLogos();
+      }
     } else {
-      alert('Erro ao fazer upload: ' + result.message);
+      alert('Erro ao fazer upload: ' + result.error);
     }
   })
   .catch(error => {
     console.error('Upload error:', error);
+    alert('Erro ao fazer upload do logo');
   });
 
 // ==============================
@@ -902,6 +909,13 @@ function deleteBranchCfg(id){
 document.addEventListener('DOMContentLoaded', function(){
   if (CFG_ABA === 'filiais'){
     loadBranchesCfg();
+  }
+  
+  // Auto-load logos when Sistema tab is active
+  if (CFG_ABA === 'sistema'){
+    if (typeof loadLogos === 'function') {
+      loadLogos();
+    }
   }
 });
 
@@ -1183,5 +1197,64 @@ function deleteLogo(id) {
 
 .logo-info {
   flex-grow: 1;
+}
+
+.logo-form {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.logo-form .sap-form-group {
+  margin-bottom: 1rem;
+}
+
+.logo-form .sap-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.logo-form .sap-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.logo-form .modern-btn {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.logo-form .modern-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.logo-form .modern-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.logo-form .modern-btn-green {
+  background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+}
+
+.logo-form .modern-btn-green:hover {
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
 }
 </style>

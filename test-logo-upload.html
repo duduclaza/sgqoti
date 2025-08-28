@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Upload de Logo - SGQ OTI</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .upload-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px dashed #cbd5e0;
+            margin: 15px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #374151;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .logos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .logo-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .logo-item img {
+            max-width: 100px;
+            max-height: 60px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .logo-item h4 {
+            margin: 10px 0 5px 0;
+            color: #374151;
+        }
+        .logo-item small {
+            color: #6b7280;
+        }
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖼️ Teste de Upload de Logos - SGQ OTI</h1>
+            <p>Sistema de teste para verificar a funcionalidade de upload e gerenciamento de logos</p>
+        </div>
+
+        <!-- Formulário de Upload -->
+        <div class="test-section">
+            <h3>📤 Upload de Logo</h3>
+            <form id="uploadForm" class="upload-form">
+                <div class="form-group">
+                    <label for="tipo">Tipo do Logo:</label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="sidebar">Sidebar (Menu Lateral)</option>
+                        <option value="header">Header (Cabeçalho)</option>
+                        <option value="login">Login (Tela de Login)</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nome">Nome do Logo:</label>
+                    <input type="text" id="nome" name="nome" value="Logo Teste" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="logo">Arquivo de Imagem:</label>
+                    <input type="file" id="logo" name="logo" accept="image/*" required>
+                    <small>Formatos aceitos: PNG, JPG, GIF, WebP, SVG (máx. 5MB)</small>
+                </div>
+                
+                <button type="submit" class="btn">
+                    <span>📤</span> Enviar Logo
+                </button>
+            </form>
+            
+            <div id="uploadResult" class="result"></div>
+        </div>
+
+        <!-- Lista de Logos -->
+        <div class="test-section">
+            <h3>🖼️ Logos Cadastrados</h3>
+            <button onclick="loadLogos()" class="btn" style="background: #10b981;">
+                <span>🔄</span> Recarregar Lista
+            </button>
+            <div id="logosList" class="logos-grid">
+                <!-- Logos serão carregados aqui -->
+            </div>
+        </div>
+
+        <!-- Teste de API -->
+        <div class="test-section">
+            <h3>🔧 Teste de API</h3>
+            <button onclick="testAPI()" class="btn" style="background: #f59e0b;">
+                <span>🧪</span> Testar Conexão com API
+            </button>
+            <div id="apiResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Upload de logo
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const resultDiv = document.getElementById('uploadResult');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            
+            // Mostrar loading
+            submitBtn.innerHTML = '<span>⏳</span> Enviando...';
+            submitBtn.disabled = true;
+            
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = '⏳ Enviando arquivo...';
+            
+            fetch('backend/api/logos.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(text => {
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        resultDiv.className = 'result success';
+                        resultDiv.innerHTML = `
+                            ✅ <strong>Upload realizado com sucesso!</strong><br>
+                            <strong>ID:</strong> ${data.logo_id}<br>
+                            <strong>URL:</strong> <a href="${data.url}" target="_blank">${data.url}</a>
+                        `;
+                        // Limpar formulário
+                        document.getElementById('uploadForm').reset();
+                        // Recarregar lista
+                        loadLogos();
+                    } else {
+                        resultDiv.className = 'result error';
+                        resultDiv.innerHTML = `❌ <strong>Erro:</strong> ${data.error}`;
+                    }
+                } catch (e) {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `❌ <strong>Erro de resposta:</strong><br><pre>${text}</pre>`;
+                }
+            })
+            .catch(error => {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ <strong>Erro na requisição:</strong> ${error.message}`;
+            })
+            .finally(() => {
+                submitBtn.innerHTML = '<span>📤</span> Enviar Logo';
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Carregar logos
+        function loadLogos() {
+            const logosList = document.getElementById('logosList');
+            logosList.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Carregando logos...</div>';
+            
+            fetch('backend/api/logos.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.logos && data.logos.length > 0) {
+                        logosList.innerHTML = '';
+                        data.logos.forEach(logo => {
+                            const logoDiv = document.createElement('div');
+                            logoDiv.className = 'logo-item';
+                            logoDiv.innerHTML = `
+                                <img src="${logo.url}" alt="${logo.nome}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgMTAwIDYwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik01MCAzMEM1MyAzMCA1NSAzMiA1NSAzNUM1NSAzOCA1MyA0MCA1MCA0MEM0NyA0MCA0NSAzOCA0NSAzNUM0NSAzMiA0NyAzMCA1MCAzMFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHN2Zz4K'">
+                                <h4>${logo.nome}</h4>
+                                <small>Tipo: ${logo.tipo}</small><br>
+                                <small>Tamanho: ${(logo.tamanho / 1024).toFixed(1)} KB</small><br>
+                                <small>Criado: ${new Date(logo.created_at).toLocaleString()}</small>
+                                <br>
+                                <button class="delete-btn" onclick="deleteLogo(${logo.id})">🗑️ Remover</button>
+                            `;
+                            logosList.appendChild(logoDiv);
+                        });
+                    } else {
+                        logosList.innerHTML = '<div style="text-align: center; padding: 20px; color: #6b7280;">📭 Nenhum logo cadastrado</div>';
+                    }
+                } else {
+                    logosList.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">❌ Erro ao carregar logos</div>';
+                }
+            })
+            .catch(error => {
+                logosList.innerHTML = '<div style="text-align: center; padding: 20px; color: #ef4444;">❌ Erro na requisição</div>';
+                console.error('Erro:', error);
+            });
+        }
+
+        // Deletar logo
+        function deleteLogo(id) {
+            if (confirm('Tem certeza que deseja remover este logo?')) {
+                fetch(`backend/api/logos.php?id=${id}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('✅ Logo removido com sucesso!');
+                        loadLogos();
+                    } else {
+                        alert('❌ Erro: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    alert('❌ Erro ao remover logo: ' + error.message);
+                });
+            }
+        }
+
+        // Testar API
+        function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result';
+            resultDiv.innerHTML = '⏳ Testando conexão com API...';
+            
+            fetch('backend/api/logos.php')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+            })
+            .then(data => {
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    ✅ <strong>API funcionando corretamente!</strong><br>
+                    <strong>Status:</strong> ${data.success ? 'Sucesso' : 'Erro'}<br>
+                    <strong>Logos encontrados:</strong> ${data.logos ? data.logos.length : 0}
+                `;
+            })
+            .catch(error => {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ <strong>Erro na API:</strong> ${error.message}`;
+            });
+        }
+
+        // Carregar logos ao inicializar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLogos();
+        });
+    </script>
+</body>
+</html>
