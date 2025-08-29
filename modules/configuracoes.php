@@ -119,73 +119,87 @@ $aba = $_GET['aba'] ?? 'sistema';
         <div class="sap-card">
           <div class="sap-card-header">
             <h3 class="sap-card-title">Gestão de Usuários</h3>
-            // Simplified logo upload flow using backend/api/logo-manager.php
-            function initLogoUploadSimple() {
-              const form = document.getElementById('logo-upload-form');
-              if (!form) return;
+            <button class="sap-button" onclick="showAddUserModal()">
+              <span class="sap-button-icon">➕</span>Novo Usuário
+            </button>
+          </div>
+          <div class="sap-card-content">
+            <!-- Lista de Usuários -->
+            <div class="sap-table-container">
+              <table class="sap-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Usuário</th>
+                    <th>Criado em</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="usuarios-table">
+                  <?php if (!empty($usuarios)): ?>
+                    <?php foreach ($usuarios as $user): ?>
+                      <tr>
+                        <td><?= $user['id'] ?></td>
+                        <td><?= htmlspecialchars($user['nome']) ?></td>
+                        <td><?= htmlspecialchars($user['email']) ?></td>
+                        <td><?= htmlspecialchars($user['usuario']) ?></td>
+                        <td><?= date('d/m/Y H:i', strtotime($user['created_at'])) ?></td>
+                        <td>
+                          <button class="sap-button-small" onclick="editUser(<?= $user['id'] ?>)">✏️</button>
+                          <button class="sap-button-small sap-button-danger" onclick="deleteUser(<?= $user['id'] ?>)">🗑️</button>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  <?php else: ?>
+                    <tr>
+                      <td colspan="6" class="text-center">Nenhum usuário encontrado</td>
+                    </tr>
+                  <?php endif; ?>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
 
-              form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                const input = document.getElementById('logo-file');
-                if (!input || !input.files || !input.files[0]) {
-                  alert('Selecione um arquivo PNG.');
-                  return;
-                }
-                const file = input.files[0];
-                if (file.type !== 'image/png') {
-                  alert('Apenas arquivos PNG são permitidos.');
-                  return;
-                }
-                if (file.size > 2 * 1024 * 1024) {
-                  alert('Arquivo muito grande. Máx 2MB.');
-                  return;
-                }
+      <?php elseif ($aba == 'backup'): ?>
+        <!-- Aba Backup -->
+        <div class="sap-card">
+          <div class="sap-card-header">
+            <h3 class="sap-card-title">Backup e Restauração</h3>
+          </div>
+          <div class="sap-card-content">
+            <div class="sap-form">
+              <div class="sap-form-group">
+                <label class="sap-label">Último Backup</label>
+                <input type="text" class="sap-input" value="Nunca realizado" readonly>
+              </div>
+              <div class="sap-form-actions">
+                <button class="sap-button">💾 Fazer Backup</button>
+                <button class="sap-button sap-button-secondary">📥 Restaurar</button>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                const fd = new FormData();
-                fd.append('logo', file);
-
-                const submitBtn = form.querySelector('button[type="submit"]');
-                const originalText = submitBtn ? submitBtn.innerHTML : null;
-                if (submitBtn) {
-                  submitBtn.disabled = true;
-                  submitBtn.innerHTML = '<span>⏳</span> Enviando...';
-                }
-
-                fetch('backend/api/logo-manager.php', { method: 'POST', body: fd })
-                  .then(r => r.json())
-                  .then(res => {
-                    if (res.success) {
-                      alert('Logo enviado com sucesso!');
-                      // Atualizar preview local
-                      const preview = document.getElementById('logo-preview');
-                      if (preview) {
-                        preview.src = res.url + '?t=' + new Date().getTime();
-                        preview.style.display = 'block';
-                      }
-                      // Atualizar sidebar global se houver
-                      try {
-                        const sidebarLogo = window.parent?.document?.getElementById('sidebar-logo') ||
-                                            window.top?.document?.getElementById('sidebar-logo') ||
-                                            document.getElementById('sidebar-logo');
-                        if (sidebarLogo) {
-                          sidebarLogo.src = 'backend/api/logo-manager.php?download=1&t=' + new Date().getTime();
-                          sidebarLogo.style.display = 'block';
-                        }
-                      } catch (e) { /* ignore */ }
-                      form.reset();
-                    } else {
-                      alert('Erro: ' + (res.error || 'Falha no upload'));
-                    }
-                  })
-                  .catch(() => alert('Erro ao enviar arquivo'))
-                  .finally(() => {
-                    if (submitBtn && originalText) {
-                      submitBtn.innerHTML = originalText;
-                      submitBtn.disabled = false;
-                    }
-                  });
-              });
-            }
+      <?php elseif ($aba == 'logs'): ?>
+        <!-- Aba Logs -->
+        <div class="sap-card">
+          <div class="sap-card-header">
+            <h3 class="sap-card-title">Logs do Sistema</h3>
+          </div>
+          <div class="sap-card-content">
+            <div class="sap-log-viewer">
+              <div class="sap-log-entry">
+                <span class="sap-log-time"><?= date('Y-m-d H:i:s') ?></span>
+                <span class="sap-log-level info">INFO</span>
+                <span class="sap-log-message">Sistema iniciado com sucesso</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      <?php endif; ?>
   border-bottom: 3px solid transparent;
   transition: all 0.3s ease;
 }
@@ -901,51 +915,10 @@ document.getElementById('addUserForm').addEventListener('submit', function(e) {
 
 // Event listener unificado para inicialização da página
 document.addEventListener('DOMContentLoaded', function() {
-  // 1. Inicializar configurações de logo
-  // Initialize slider values
-  updateLogoSize('menu');
-  updateLogoSize('login');
-  
-  // Update preview text
-  updatePreviewText();
-  
-  // 2. Configurar uploads de logo
-  // Upload de logo sidebar
-  const sidebarForm = document.getElementById('logo-sidebar-form');
-  if (sidebarForm) {
-    sidebarForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      uploadLogo(this, 'sidebar');
-    });
-  }
-  
-  // Upload de logo header
-  const headerForm = document.getElementById('logo-header-form');
-  if (headerForm) {
-    headerForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      uploadLogo(this, 'header');
-    });
-  }
-  
-  // Configurar os inputs de upload da aba empresa
-  const menuLogoInput = document.getElementById('menu-logo-input');
-  if (menuLogoInput) {
-    menuLogoInput.onchange = function() {
-      handleLogoUpload(this, 'menu');
-    };
-  }
-  
-  const loginLogoInput = document.getElementById('login-logo-input');
-  if (loginLogoInput) {
-    loginLogoInput.onchange = function() {
-      handleLogoUpload(this, 'login');
-    };
-  }
-  
-  // Carregar logos existentes
-  if (document.getElementById('logos-list')) {
-    loadLogos();
+  // Inicializar logo upload se estiver na aba logos
+  if (document.getElementById('logo-upload-form')) {
+    initLogoUploadSimple();
+    loadLogosSimple();
   }
   
   // 3. Carregar dados específicos da aba
@@ -981,6 +954,74 @@ function uploadLogo(form, tipo) {
   
   // Resetar o formulário
   form.reset();
+}
+
+// Simplified logo upload flow using backend/api/logo-manager.php
+function initLogoUploadSimple() {
+  const form = document.getElementById('logo-upload-form');
+  if (!form) return;
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const input = document.getElementById('logo-file');
+    if (!input || !input.files || !input.files[0]) {
+      alert('Selecione um arquivo PNG.');
+      return;
+    }
+    const file = input.files[0];
+    if (file.type !== 'image/png') {
+      alert('Apenas arquivos PNG são permitidos.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Arquivo muito grande. Máx 2MB.');
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append('logo', file);
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn ? submitBtn.innerHTML : null;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span>⏳</span> Enviando...';
+    }
+
+    fetch('backend/api/logo-manager.php', { method: 'POST', body: fd })
+      .then(r => r.json())
+      .then(res => {
+        if (res.success) {
+          alert('Logo enviado com sucesso!');
+          // Atualizar preview local
+          const preview = document.getElementById('logo-preview');
+          if (preview) {
+            preview.src = res.url + '?t=' + new Date().getTime();
+            preview.style.display = 'block';
+          }
+          // Atualizar sidebar global se houver
+          try {
+            const sidebarLogo = window.parent?.document?.getElementById('sidebar-logo') ||
+                                window.top?.document?.getElementById('sidebar-logo') ||
+                                document.getElementById('sidebar-logo');
+            if (sidebarLogo) {
+              sidebarLogo.src = 'backend/api/logo-manager.php?download=1&t=' + new Date().getTime();
+              sidebarLogo.style.display = 'block';
+            }
+          } catch (e) { /* ignore */ }
+          form.reset();
+        } else {
+          alert('Erro: ' + (res.error || 'Falha no upload'));
+        }
+      })
+      .catch(() => alert('Erro ao enviar arquivo'))
+      .finally(() => {
+        if (submitBtn && originalText) {
+          submitBtn.innerHTML = originalText;
+          submitBtn.disabled = false;
+        }
+      });
+  });
 }
 
 function loadLogosSimple() {
