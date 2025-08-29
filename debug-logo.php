@@ -34,7 +34,7 @@ try {
                 echo "<td>" . number_format($logo['tamanho'] / 1024, 1) . " KB</td>";
                 echo "<td>" . ($logo['ativo'] ? 'SIM' : 'NÃO') . "</td>";
                 echo "<td>{$logo['created_at']}</td>";
-                echo "<td><a href='backend/api/logos.php?tipo={$logo['tipo']}&download=1' target='_blank'>Ver</a></td>";
+                echo "<td><a href='backend/api/logo-manager.php?download=1' target='_blank'>Ver</a></td>";
                 echo "</tr>";
             }
             echo "</table>";
@@ -43,7 +43,7 @@ try {
             echo "<h3>🧪 Testes de URL:</h3>";
             $tipos = ['sidebar', 'header', 'login'];
             foreach ($tipos as $tipo) {
-                $url = "backend/api/logos.php?tipo=$tipo&download=1";
+                $url = "backend/api/logo-manager.php?download=1";
                 echo "<p><strong>$tipo:</strong> <a href='$url' target='_blank'>$url</a></p>";
             }
             

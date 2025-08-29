@@ -207,7 +207,7 @@
             resultDiv.className = 'result';
             resultDiv.innerHTML = '⏳ Enviando arquivo...';
             
-            fetch('backend/api/logos.php', {
+            fetch('backend/api/logo-manager.php', {
                 method: 'POST',
                 body: formData
             })
@@ -250,7 +250,7 @@
             const logosList = document.getElementById('logosList');
             logosList.innerHTML = '<div style="text-align: center; padding: 20px;">⏳ Carregando logos...</div>';
             
-            fetch('backend/api/logos.php')
+            fetch('backend/api/logo-manager.php')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -286,7 +286,7 @@
         // Deletar logo
         function deleteLogo(id) {
             if (confirm('Tem certeza que deseja remover este logo?')) {
-                fetch(`backend/api/logos.php?id=${id}`, {
+                fetch(`backend/api/logo-manager.php?id=${id}`, {
                     method: 'DELETE'
                 })
                 .then(response => response.json())

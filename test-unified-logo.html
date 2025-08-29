@@ -279,7 +279,7 @@
                 button.disabled = true;
             }
             
-            fetch('backend/api/logos.php', {
+            fetch('backend/api/logo-manager.php', {
                 method: 'POST',
                 body: formData
             })
@@ -368,7 +368,7 @@
         // Função para deletar logo
         function deleteLogo(id) {
             if (confirm('Tem certeza que deseja remover este logo?')) {
-                fetch(`backend/api/logos.php?id=${id}`, {
+                fetch(`backend/api/logo-manager.php?id=${id}`, {
                     method: 'DELETE'
                 })
                 .then(response => response.json())
@@ -398,7 +398,7 @@
             
             if (sidebarLogo) {
                 const timestamp = new Date().getTime();
-                sidebarLogo.src = 'backend/api/logos.php?tipo=sidebar&download=1&t=' + timestamp;
+                sidebarLogo.src = 'backend/api/logo-manager.php?download=1&t=' + timestamp;
                 
                 sidebarLogo.onload = function() {
                     sidebarLogo.style.display = 'block';
@@ -417,7 +417,7 @@
             
             if (sidebarPreview) {
                 const timestamp = new Date().getTime();
-                sidebarPreview.src = 'backend/api/logos.php?tipo=sidebar&download=1&t=' + timestamp;
+                sidebarPreview.src = 'backend/api/logo-manager.php?download=1&t=' + timestamp;
                 
                 sidebarPreview.onload = function() {
                     sidebarPreview.style.display = 'block';
@@ -430,7 +430,7 @@
             
             if (headerPreview) {
                 const timestamp = new Date().getTime();
-                headerPreview.src = 'backend/api/logos.php?tipo=header&download=1&t=' + timestamp;
+                headerPreview.src = 'backend/api/logo-manager.php?download=1&t=' + timestamp;
                 
                 headerPreview.onload = function() {
                     headerPreview.style.display = 'block';

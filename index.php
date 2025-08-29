@@ -1040,7 +1040,7 @@ $module = $_GET['module'] ?? 'dashboard';
     <aside class="sap-sidebar">
       <div class="sap-sidebar-header">
         <div class="sap-logo-container">
-          <img id="sidebar-logo" src="backend/api/logos.php?tipo=sidebar&download=1" alt="SGQ OTI" class="sap-logo" style="display: none;">
+          <img id="sidebar-logo" src="backend/api/logo-manager.php?download=1" alt="SGQ OTI" class="sap-logo" style="display: none;">
           <div id="logo-fallback" class="sap-logo-fallback">SGQ</div>
         </div>
         <p class="sap-sidebar-subtitle">Sistema de Gestão da Qualidade</p>

@@ -1,0 +1,6 @@
+<?php
+/* Backup do antigo controlador backend/api/logos.php.
+   O arquivo original foi movido para este backup enquanto a aplicação migra para
+   backend/api/logo-manager.php. Preserve este backup até confirmar que nenhuma
+   chamada usa mais o endpoint antigo. */
+// Conteúdo original arquivado.

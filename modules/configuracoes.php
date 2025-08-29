@@ -25,55 +25,13 @@ $aba = $_GET['aba'] ?? 'sistema';
       <a href="?module=configuracoes&aba=logs" class="sap-tab-link <?= $aba == 'logs' ? 'active' : '' ?>">
         <span class="sap-tab-icon">📋</span>Logs
       </a>
+      <a href="?module=configuracoes&aba=logos" class="sap-tab-link <?= $aba == 'logos' ? 'active' : '' ?>">
+        <span class="sap-tab-icon">🖼️</span>Logos
+      </a>
     </div>
     
     <div class="sap-tab-content">
       <?php if ($aba == 'sistema'): ?>
-        <!-- Aba Sistema -->
-        <div class="sap-card">
-          <div class="sap-card-header">
-            <h3>Gerenciar Logos</h3>
-          </div>
-          <div class="sap-card-content">
-            <div class="logo-upload-section">
-              <h4>Upload de Logo do Sidebar</h4>
-              <form id="logo-sidebar-form" enctype="multipart/form-data" class="logo-form">
-                <input type="hidden" name="tipo" value="sidebar">
-                <input type="hidden" name="nome" value="Logo Sidebar">
-                <div class="sap-form-group">
-                  <label class="sap-label">Selecionar Imagem (PNG, JPG, SVG - máx 5MB)</label>
-                  <input type="file" name="logo" accept="image/*" class="sap-input" required>
-                </div>
-                <button type="submit" class="modern-btn modern-btn-primary">
-                  <span>📤</span> Enviar Logo Sidebar
-                </button>
-              </form>
-            </div>
-            
-            <div class="logo-upload-section" style="margin-top: 2rem;">
-              <h4>Upload de Logo do Header</h4>
-              <form id="logo-header-form" enctype="multipart/form-data" class="logo-form">
-                <input type="hidden" name="tipo" value="header">
-                <input type="hidden" name="nome" value="Logo Header">
-                <div class="sap-form-group">
-                  <label class="sap-label">Selecionar Imagem (PNG, JPG, SVG - máx 5MB)</label>
-                  <input type="file" name="logo" accept="image/*" class="sap-input" required>
-                </div>
-                <button type="submit" class="modern-btn modern-btn-green">
-                  <span>📤</span> Enviar Logo Header
-                </button>
-              </form>
-            </div>
-            
-            <div class="logos-preview" style="margin-top: 2rem;">
-              <h4>Logos Atuais</h4>
-              <div id="logos-list" class="logos-grid">
-                <!-- Logos serão carregados aqui -->
-              </div>
-            </div>
-          </div>
-        </div>
-        
         <div class="sap-card" style="margin-top: 2rem;">
           <div class="sap-card-header">
             <h3>Configurações do Sistema</h3>
@@ -93,121 +51,30 @@ $aba = $_GET['aba'] ?? 'sistema';
           </div>
         </div>
         
-      <?php elseif ($aba == 'empresa'): ?>
-        <!-- Aba Dados da Empresa -->
+      <?php elseif ($aba == 'logos'): ?>
+        <!-- Aba Logos -->
         <div class="sap-card">
           <div class="sap-card-header">
-            <h3 class="sap-card-title">Dados da Empresa</h3>
+            <h3>Upload e Preview de Logo (PNG)</h3>
           </div>
           <div class="sap-card-content">
-            <div class="sap-form">
+            <form id="logo-upload-form" enctype="multipart/form-data" class="logo-form">
               <div class="sap-form-group">
-                <label class="sap-label">Nome da Empresa</label>
-                <input type="text" class="sap-input" id="empresa-nome" value="SGQ OTI" onchange="updatePreview()">
+                <label class="sap-label">Selecione um arquivo PNG (máx 2MB)</label>
+                <input type="file" name="logo" id="logo-file" accept="image/png" class="sap-input" required>
               </div>
-              <div class="sap-form-group">
-                <label class="sap-label">Descrição</label>
-                <input type="text" class="sap-input" id="empresa-descricao" value="Sistema de Gestão da Qualidade" onchange="updatePreview()">
-              </div>
+              <button type="submit" class="modern-btn modern-btn-primary">
+                <span>📤</span> Enviar Logo
+              </button>
+            </form>
+            <div class="logo-preview-section" style="margin-top:2rem;">
+              <h4>Preview Atual</h4>
+              <img id="logo-preview" src="/assets/images/logo-preview.png" alt="Logo Preview" style="max-width:200px;max-height:120px;border:1px solid #e2e8f0;border-radius:8px;display:block;">
             </div>
           </div>
         </div>
 
-        <!-- Configuração de Logos -->
-        <div class="sap-card" style="margin-top: 20px;">
-          <div class="sap-card-header">
-            <h3 class="sap-card-title">Configuração de Logos</h3>
-          </div>
-          <div class="sap-card-content">
-            <div class="logo-config-grid">
-              <!-- Logo do Menu -->
-              <div class="logo-config-section">
-                <h4>Logo do Menu Lateral</h4>
-                <div class="logo-upload-area" onclick="document.getElementById('menu-logo-input').click()">
-                  <img id="menu-logo-preview" src="assets/images/logo.png" alt="Logo Menu" onerror="this.style.display='none'">
-                  <div class="upload-placeholder">
-                    <span>📁 Clique para enviar logo</span>
-                    <small>PNG, JPG, SVG (máx. 2MB)</small>
-                  </div>
-                </div>
-                <input type="file" id="menu-logo-input" accept="image/*" style="display: none;" onchange="handleLogoUpload(this, 'menu')">
-                
-                <div class="logo-controls">
-                  <label class="sap-label">Largura (px)</label>
-                  <input type="range" id="menu-logo-width" min="50" max="300" value="180" onchange="updateLogoSize('menu')">
-                  <span id="menu-logo-width-value">180px</span>
-                  
-                  <label class="sap-label">Altura (px)</label>
-                  <input type="range" id="menu-logo-height" min="30" max="150" value="60" onchange="updateLogoSize('menu')">
-                  <span id="menu-logo-height-value">60px</span>
-                </div>
-              </div>
-
-              <!-- Logo do Login -->
-              <div class="logo-config-section">
-                <h4>Logo da Tela de Login</h4>
-                <div class="logo-upload-area" onclick="document.getElementById('login-logo-input').click()">
-                  <img id="login-logo-preview" src="assets/images/logo.png" alt="Logo Login" onerror="this.style.display='none'">
-                  <div class="upload-placeholder">
-                    <span>📁 Clique para enviar logo</span>
-                    <small>PNG, JPG, SVG (máx. 2MB)</small>
-                  </div>
-                </div>
-                <input type="file" id="login-logo-input" accept="image/*" style="display: none;" onchange="handleLogoUpload(this, 'login')">
-                
-                <div class="logo-controls">
-                  <label class="sap-label">Largura (px)</label>
-                  <input type="range" id="login-logo-width" min="100" max="400" value="180" onchange="updateLogoSize('login')">
-                  <span id="login-logo-width-value">180px</span>
-                  
-                  <label class="sap-label">Altura (px)</label>
-                  <input type="range" id="login-logo-height" min="50" max="200" value="80" onchange="updateLogoSize('login')">
-                  <span id="login-logo-height-value">80px</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Preview das Telas -->
-            <div class="preview-section">
-              <h4>Preview das Telas</h4>
-              <div class="preview-grid">
-                <!-- Preview Menu -->
-                <div class="preview-card">
-                  <h5>Menu Lateral</h5>
-                  <div class="preview-menu">
-                    <div class="preview-menu-header">
-                      <img id="preview-menu-logo" src="assets/images/logo.png" alt="Logo">
-                      <div class="preview-menu-text">
-                        <div class="preview-menu-title" id="preview-menu-title">SGQ OTI</div>
-                        <div class="preview-menu-subtitle" id="preview-menu-subtitle">Sistema de Gestão da Qualidade</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Preview Login -->
-                <div class="preview-card">
-                  <h5>Tela de Login</h5>
-                  <div class="preview-login">
-                    <div class="preview-login-left">
-                      <img id="preview-login-logo" src="assets/images/logo.png" alt="Logo">
-                      <div class="preview-login-title" id="preview-login-title">SGQ OTI</div>
-                      <div class="preview-login-subtitle" id="preview-login-subtitle">Sistema de Gestão da Qualidade</div>
-                    </div>
-                    <div class="preview-login-right">
-                      <div class="preview-form">Bem-vindo</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="sap-form-actions" style="margin-top: 20px;">
-              <button class="sap-button" onclick="saveLogoSettings()">💾 Salvar Configurações</button>
-              <button class="sap-button sap-button-secondary" onclick="resetLogos()">🔄 Restaurar Padrão</button>
-            </div>
-          </div>
-        </div>
+      <?php elseif ($aba == 'empresa'): ?>
         
       <?php elseif ($aba == 'filiais'): ?>
         <!-- Aba Filiais -->
@@ -252,147 +119,73 @@ $aba = $_GET['aba'] ?? 'sistema';
         <div class="sap-card">
           <div class="sap-card-header">
             <h3 class="sap-card-title">Gestão de Usuários</h3>
-            <button class="sap-button" onclick="showAddUserModal()">
-              <span class="sap-button-icon">➕</span>Novo Usuário
-            </button>
-          </div>
-          <div class="sap-card-content">
-            <!-- Lista de Usuários -->
-            <div class="sap-table-container">
-              <table class="sap-table">
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>Nome</th>
-                    <th>Email</th>
-                    <th>Usuário</th>
-                    <th>Criado em</th>
-                    <th>Ações</th>
-                  </tr>
-                </thead>
-                <tbody id="usuarios-table">
-                  <?php if (!empty($usuarios)): ?>
-                    <?php foreach ($usuarios as $user): ?>
-                      <tr>
-                        <td><?= $user['id'] ?></td>
-                        <td><?= htmlspecialchars($user['nome']) ?></td>
-                        <td><?= htmlspecialchars($user['email']) ?></td>
-                        <td><?= htmlspecialchars($user['usuario']) ?></td>
-                        <td><?= date('d/m/Y H:i', strtotime($user['created_at'])) ?></td>
-                        <td>
-                          <button class="sap-button-small" onclick="editUser(<?= $user['id'] ?>)">✏️</button>
-                          <button class="sap-button-small sap-button-danger" onclick="deleteUser(<?= $user['id'] ?>)">🗑️</button>
-                        </td>
-                      </tr>
-                    <?php endforeach; ?>
-                  <?php else: ?>
-                    <tr>
-                      <td colspan="6" class="text-center">Nenhum usuário encontrado</td>
-                    </tr>
-                  <?php endif; ?>
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        
-      <?php elseif ($aba == 'backup'): ?>
-        <!-- Aba Backup -->
-        <div class="sap-card">
-          <div class="sap-card-header">
-            <h3 class="sap-card-title">Backup e Restauração</h3>
-          </div>
-          <div class="sap-card-content">
-            <div class="sap-form">
-              <div class="sap-form-group">
-                <label class="sap-label">Último Backup</label>
-                <input type="text" class="sap-input" value="Nunca realizado" readonly>
-              </div>
-              <div class="sap-form-actions">
-                <button class="sap-button">💾 Fazer Backup</button>
-                <button class="sap-button sap-button-secondary">📥 Restaurar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-      <?php elseif ($aba == 'logs'): ?>
-        <!-- Aba Logs -->
-        <div class="sap-card">
-          <div class="sap-card-header">
-            <h3 class="sap-card-title">Logs do Sistema</h3>
-          </div>
-          <div class="sap-card-content">
-            <div class="sap-log-viewer">
-              <div class="sap-log-entry">
-                <span class="sap-log-time"><?= date('Y-m-d H:i:s') ?></span>
-                <span class="sap-log-level info">INFO</span>
-                <span class="sap-log-message">Sistema iniciado com sucesso</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      <?php endif; ?>
-    </div>
-  </div>
-</div>
+            // Simplified logo upload flow using backend/api/logo-manager.php
+            function initLogoUploadSimple() {
+              const form = document.getElementById('logo-upload-form');
+              if (!form) return;
 
-<!-- Modal para Adicionar Usuário -->
-<div id="addUserModal" class="sap-modal" style="display: none;">
-  <div class="sap-modal-content">
-    <div class="sap-modal-header">
-      <h3>Novo Usuário</h3>
-      <button class="sap-modal-close" onclick="hideAddUserModal()">&times;</button>
-    </div>
-    <div class="sap-modal-body">
-      <form id="addUserForm" class="sap-form">
-        <div class="sap-form-group">
-          <label class="sap-label">Nome Completo</label>
-          <input type="text" name="nome" class="sap-input" required>
-        </div>
-        <div class="sap-form-group">
-          <label class="sap-label">Email</label>
-          <input type="email" name="email" class="sap-input" required>
-        </div>
-        <div class="sap-form-group">
-          <label class="sap-label">Nome de Usuário</label>
-          <input type="text" name="usuario" class="sap-input" required>
-        </div>
-        <div class="sap-form-group">
-          <label class="sap-label">Senha</label>
-          <input type="password" name="senha" class="sap-input" required>
-        </div>
-        <div class="sap-form-actions">
-          <button type="submit" class="sap-button">Criar Usuário</button>
-          <button type="button" class="sap-button sap-button-secondary" onclick="hideAddUserModal()">Cancelar</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
+              form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const input = document.getElementById('logo-file');
+                if (!input || !input.files || !input.files[0]) {
+                  alert('Selecione um arquivo PNG.');
+                  return;
+                }
+                const file = input.files[0];
+                if (file.type !== 'image/png') {
+                  alert('Apenas arquivos PNG são permitidos.');
+                  return;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                  alert('Arquivo muito grande. Máx 2MB.');
+                  return;
+                }
 
-<style>
-/* Estilos para as abas */
-.sap-tabs {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  overflow: hidden;
-}
+                const fd = new FormData();
+                fd.append('logo', file);
 
-.sap-tab-nav {
-  display: flex;
-  background: #f8f9fa;
-  border-bottom: 1px solid #e0e0e0;
-}
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const originalText = submitBtn ? submitBtn.innerHTML : null;
+                if (submitBtn) {
+                  submitBtn.disabled = true;
+                  submitBtn.innerHTML = '<span>⏳</span> Enviando...';
+                }
 
-.sap-tab-link {
-  display: flex;
-  align-items: center;
-  padding: 16px 24px;
-  text-decoration: none;
-  color: #666;
-  font-weight: 500;
+                fetch('backend/api/logo-manager.php', { method: 'POST', body: fd })
+                  .then(r => r.json())
+                  .then(res => {
+                    if (res.success) {
+                      alert('Logo enviado com sucesso!');
+                      // Atualizar preview local
+                      const preview = document.getElementById('logo-preview');
+                      if (preview) {
+                        preview.src = res.url + '?t=' + new Date().getTime();
+                        preview.style.display = 'block';
+                      }
+                      // Atualizar sidebar global se houver
+                      try {
+                        const sidebarLogo = window.parent?.document?.getElementById('sidebar-logo') ||
+                                            window.top?.document?.getElementById('sidebar-logo') ||
+                                            document.getElementById('sidebar-logo');
+                        if (sidebarLogo) {
+                          sidebarLogo.src = 'backend/api/logo-manager.php?download=1&t=' + new Date().getTime();
+                          sidebarLogo.style.display = 'block';
+                        }
+                      } catch (e) { /* ignore */ }
+                      form.reset();
+                    } else {
+                      alert('Erro: ' + (res.error || 'Falha no upload'));
+                    }
+                  })
+                  .catch(() => alert('Erro ao enviar arquivo'))
+                  .finally(() => {
+                    if (submitBtn && originalText) {
+                      submitBtn.innerHTML = originalText;
+                      submitBtn.disabled = false;
+                    }
+                  });
+              });
+            }
   border-bottom: 3px solid transparent;
   transition: all 0.3s ease;
 }
@@ -823,7 +616,7 @@ function uploadLogoToServer(file, type) {
     button.disabled = true;
   }
   
-  fetch('backend/api/logos.php', {
+  fetch('backend/api/logo-manager.php', {
     method: 'POST',
     body: formData
   })
@@ -1190,58 +983,23 @@ function uploadLogo(form, tipo) {
   form.reset();
 }
 
-function loadLogos() {
-  fetch('backend/api/logos.php')
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      const logosList = document.getElementById('logos-list');
-      if (logosList) {
-        logosList.innerHTML = '';
-        
-        data.logos.forEach(logo => {
-          const logoDiv = document.createElement('div');
-          logoDiv.className = 'logo-item';
-          logoDiv.innerHTML = `
-            <div class="logo-preview">
-              <img src="${logo.url}" alt="${logo.nome}" style="max-width: 100px; max-height: 60px;">
-            </div>
-            <div class="logo-info">
-              <strong>${logo.nome}</strong><br>
-              <small>Tipo: ${logo.tipo}</small><br>
-              <small>Tamanho: ${(logo.tamanho / 1024).toFixed(1)} KB</small>
-            </div>
-            <button onclick="deleteLogo(${logo.id})" class="modern-btn" style="background: #ef4444; padding: 0.5rem;">
-              🗑️
-            </button>
-          `;
-          logosList.appendChild(logoDiv);
-        });
-      }
-    }
-  })
-  .catch(error => console.error('Erro ao carregar logos:', error));
-}
-
-function deleteLogo(id) {
-  if (confirm('Tem certeza que deseja remover este logo?')) {
-    fetch(`backend/api/logos.php?id=${id}`, {
-      method: 'DELETE'
-    })
-    .then(response => response.json())
-    .then(data => {
-      if (data.success) {
-        alert('Logo removido com sucesso!');
-        loadLogos();
+function loadLogosSimple() {
+  // Retorna apenas se houver um elemento para exibir
+  const logosList = document.getElementById('logos-list');
+  if (!logosList) return;
+  fetch('backend/api/logo-manager.php')
+    .then(r => r.json())
+    .then(res => {
+      if (res.success && res.url) {
+        logosList.innerHTML = `<div class="logo-item">
+          <div class="logo-preview"><img src="${res.url}" style="max-width:100px;max-height:60px;"/></div>
+          <div class="logo-info"><strong>Logo atual</strong><br><small>Preview</small></div>
+        </div>`;
       } else {
-        alert('Erro: ' + data.error);
+        logosList.innerHTML = '<div class="text-center">Nenhum logo cadastrado</div>';
       }
     })
-    .catch(error => {
-      console.error('Erro:', error);
-      alert('Erro ao remover logo');
-    });
-  }
+    .catch(() => { logosList.innerHTML = '<div class="text-center">Erro ao carregar logos</div>'; });
 }
 </script>
 

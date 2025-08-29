@@ -23,7 +23,7 @@ header('Content-Type: text/html; charset=utf-8');
     echo "<div class='test-section'>";
     echo "<h3>📁 Teste 1: Verificação de Arquivos</h3>";
     
-    $apiFile = 'backend/api/logos.php';
+    $apiFile = 'backend/api/logo-manager.php';
     if (file_exists($apiFile)) {
         echo "<div class='success'>✅ API de logos encontrada: $apiFile</div>";
     } else {
@@ -107,7 +107,7 @@ header('Content-Type: text/html; charset=utf-8');
     echo "<div class='test-section'>";
     echo "<h3>🌐 Teste 4: Teste da API via HTTP</h3>";
     
-    $apiUrl = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/backend/api/logos.php';
+    $apiUrl = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['REQUEST_URI']) . '/backend/api/logo-manager.php';
     
     // Teste GET
     $ch = curl_init();
