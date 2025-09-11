@@ -1,14 +1,32 @@
 <?php
+// Debug para identificar erro 500
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 session_start();
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     header('Location: ../../index.php');
     exit;
 }
 
+// Verificar se arquivo existe antes de incluir
+if (!file_exists('../../config/environment.php')) {
+    die('Arquivo environment.php não encontrado');
+}
+
 require_once '../../config/environment.php';
 
-$env = Environment::getInstance();
-$activeTab = $_GET['tab'] ?? 'cadastro';
+// Verificar se classe existe
+if (!class_exists('Environment')) {
+    die('Classe Environment não encontrada');
+}
+
+try {
+    $env = Environment::getInstance();
+    $activeTab = $_GET['tab'] ?? 'cadastro';
+} catch (Exception $e) {
+    die('Erro ao instanciar Environment: ' . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
