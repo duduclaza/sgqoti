@@ -1,0 +1,33 @@
+{
+    "name": "sgqoti/sistema-gestao-qualidade",
+    "description": "Sistema de Gestão da Qualidade OTI",
+    "type": "project",
+    "require": {
+        "php": ">=7.4",
+        "phpoffice/phpspreadsheet": "^1.29",
+        "vlucas/phpdotenv": "^5.5",
+        "ramsey/uuid": "^4.7",
+        "firebase/php-jwt": "^6.8",
+        "respect/validation": "^2.2",
+        "monolog/monolog": "^3.4"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "SGQOti\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SGQOti\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

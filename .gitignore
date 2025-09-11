@@ -1,1 +1,54 @@
-node_modules
+# SGQ OTI - Arquivos a serem ignorados pelo Git
+
+# Arquivos de ambiente e configuração sensível
+.env
+.env.local
+.env.production
+
+# Logs
+storage/logs/*.log
+*.log
+
+# Cache e arquivos temporários
+storage/cache/*
+storage/temp/*
+storage/uploads/*
+!storage/uploads/.gitkeep
+
+# Dependências do Composer
+vendor/
+composer.lock
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs e editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos de backup
+*.bak
+*.backup
+*.old
+
+# Arquivos de configuração local do servidor
+.htaccess.local
+config.local.php
+
+# Node modules (caso seja usado futuramente)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Arquivos de build
+dist/
+build/
+
+# Arquivos específicos do Windows/XAMPP
+error.log
+access.log
