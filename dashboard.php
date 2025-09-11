@@ -12,9 +12,12 @@ $current_page = $_GET['page'] ?? 'home';
 $user = $_SESSION['user'] ?? 'Usuário';
 
 // Define menu items
+require_once 'config/environment.php';
+$env = Environment::getInstance();
+
 $menu_items = [
     'home' => ['title' => 'Dashboard', 'icon' => '🏠'],
-    'toners' => ['title' => 'Controle de Toners', 'icon' => '🖨️', 'url' => 'modules/toners/index.php'],
+    'toners' => ['title' => 'Controle de Toners', 'icon' => '🖨️', 'url' => $env->getBaseUrl() . '/modules/toners/index.php'],
     'homologacoes' => ['title' => 'Homologações', 'icon' => '✅'],
     'amostragens' => ['title' => 'Amostragens', 'icon' => '🧪'],
     'garantias' => ['title' => 'Garantias', 'icon' => '🛡️'],
@@ -24,7 +27,7 @@ $menu_items = [
     'fluxogramas' => ['title' => 'Fluxogramas', 'icon' => '📊'],
     'melhoria' => ['title' => 'Melhoria Continua', 'icon' => '📈'],
     'rc' => ['title' => 'Controle de RC', 'icon' => '🔧'],
-    'config' => ['title' => 'Configurações', 'icon' => '⚙️', 'url' => 'modules/config/index.php']
+    'config' => ['title' => 'Configurações', 'icon' => '⚙️', 'url' => $env->getBaseUrl() . '/modules/config/index.php']
 ];
 ?>
 <!DOCTYPE html>
