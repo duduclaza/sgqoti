@@ -6,19 +6,18 @@ import rateLimit from 'express-rate-limit'
 import dotenv from 'dotenv'
 
 // Import database
-import { testConnection } from './config/database.js'
+import { testConnection } from '../config/database.js'
 
 // Import routes
-import authRoutes from './routes/authRoutes.js'
-import usersRoutes from './routes/usersRoutes.js'
-import itemsRoutes from './routes/itemsRoutes.js'
-import tonersRoutes from './routes/toners.js'
+import authRoutes from '../routes/authRoutes.js'
+import usersRoutes from '../routes/usersRoutes.js'
+import itemsRoutes from '../routes/itemsRoutes.js'
+import tonersRoutes from '../routes/toners.js'
 
 // Load environment variables
 dotenv.config()
 
 const app = express()
-const PORT = process.env.PORT || 5000
 
 // Security middleware
 app.use(helmet())
@@ -52,7 +51,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(morgan('combined'))
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
@@ -67,7 +66,7 @@ app.use('/api/items', itemsRoutes)
 app.use('/api/toners', tonersRoutes)
 
 // 404 handler
-app.use('*', (req, res) => {
+app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'Route not found' })
 })
 
@@ -80,12 +79,7 @@ app.use((error, req, res, next) => {
   })
 })
 
-// Start server
-app.listen(PORT, async () => {
-  console.log(`🚀 Server running on port ${PORT}`)
-  console.log(`📊 Environment: ${process.env.NODE_ENV}`)
-  console.log(`🌐 CORS enabled for: ${process.env.FRONTEND_URL}`)
-  
-  // Test database connection
-  await testConnection()
-})
+// Initialize database connection
+testConnection()
+
+export default app

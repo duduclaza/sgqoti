@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teste Build - SGQ OTI</title>
+    <link rel="stylesheet" href="./assets/index-69c96f4a.css">
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #f5f5f5;
+      }
+      .test-container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      .success {
+        color: #16a34a;
+        background: #dcfce7;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 20px 0;
+      }
+      .info {
+        color: #0369a1;
+        background: #dbeafe;
+        padding: 15px;
+        border-radius: 6px;
+        margin: 20px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="test-container">
+      <h1>🎉 Build de Produção Funcionando!</h1>
+      
+      <div class="success">
+        ✅ CSS carregado corretamente<br>
+        ✅ Arquivo HTML sendo servido<br>
+        ✅ Assets com caminhos relativos funcionando
+      </div>
+
+      <div class="info">
+        <strong>Próximo passo:</strong> Para testar a aplicação React completa, você precisa servir os arquivos através de um servidor web local.
+      </div>
+
+      <h2>Como testar a aplicação completa:</h2>
+      <ol>
+        <li>Instale um servidor web simples: <code>npm install -g serve</code></li>
+        <li>Na pasta <code>frontend/dist/</code>, execute: <code>serve -s .</code></li>
+        <li>Acesse o endereço mostrado no terminal</li>
+      </ol>
+
+      <h2>Ou use Python:</h2>
+      <ol>
+        <li>Na pasta <code>frontend/dist/</code>, execute: <code>python -m http.server 8000</code></li>
+        <li>Acesse: <code>http://localhost:8000</code></li>
+      </ol>
+
+      <p><strong>Motivo:</strong> O React Router (BrowserRouter) precisa de um servidor web para gerenciar as rotas corretamente. Abrir o arquivo HTML diretamente no navegador não funciona com SPAs (Single Page Applications).</p>
+    </div>
+  </body>
+</html>
