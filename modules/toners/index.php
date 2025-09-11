@@ -385,6 +385,134 @@ try {
             }, 5000);
         }
 
+        // Carregar toners no grid
+        function loadToners() {
+            sgqFetch('toners_api.php?action=get_toners')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const tbody = document.getElementById('toners-list');
+                    tbody.innerHTML = '';
+                    
+                    data.data.forEach(toner => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="px-4 py-3 text-sm text-gray-900">${toner.modelo}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">${toner.cor}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">${toner.tipo}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">R$ ${parseFloat(toner.preco_toner).toFixed(2)}</td>
+                            <td class="px-4 py-3 text-sm text-gray-900">
+                                <button onclick="editToner(${toner.id})" class="text-blue-600 hover:text-blue-900 mr-2">Editar</button>
+                                <button onclick="deleteToner(${toner.id})" class="text-red-600 hover:text-red-900">Excluir</button>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                } else {
+                    showMessage('Erro ao carregar toners: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showMessage('Erro ao carregar toners', 'error');
+            });
+        }
+
+        // Editar toner
+        function editToner(id) {
+            sgqFetch(`toners_api.php?action=get_toner&id=${id}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const toner = data.data;
+                    const formContent = `
+                        <div class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                                    <input type="text" name="modelo" value="${toner.modelo}" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Cor</label>
+                                    <select name="cor" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
+                                        <option value="Yellow" ${toner.cor === 'Yellow' ? 'selected' : ''}>Yellow</option>
+                                        <option value="Magenta" ${toner.cor === 'Magenta' ? 'selected' : ''}>Magenta</option>
+                                        <option value="Cyan" ${toner.cor === 'Cyan' ? 'selected' : ''}>Cyan</option>
+                                        <option value="Black" ${toner.cor === 'Black' ? 'selected' : ''}>Black</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Peso Cheio (g)</label>
+                                    <input type="number" name="peso_cheio" value="${toner.peso_cheio}" step="0.001" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Peso Vazio (g)</label>
+                                    <input type="number" name="peso_vazio" value="${toner.peso_vazio}" step="0.001" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Capacidade de Folhas</label>
+                                    <input type="number" name="capacidade_folhas" value="${toner.capacidade_folhas}" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Preço do Toner (R$)</label>
+                                    <input type="number" name="preco_toner" value="${toner.preco_toner}" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                                <select name="tipo" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
+                                    <option value="Original" ${toner.tipo === 'Original' ? 'selected' : ''}>Original</option>
+                                    <option value="Compativel" ${toner.tipo === 'Compativel' ? 'selected' : ''}>Compatível</option>
+                                    <option value="Remanufaturado" ${toner.tipo === 'Remanufaturado' ? 'selected' : ''}>Remanufaturado</option>
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('edit-form-content').innerHTML = formContent;
+                    document.querySelector('#edit-form input[name="id"]').value = id;
+                    document.getElementById('edit-modal').classList.remove('hidden');
+                } else {
+                    showMessage('Erro ao carregar toner: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showMessage('Erro ao carregar toner', 'error');
+            });
+        }
+
+        // Excluir toner
+        function deleteToner(id) {
+            if (confirm('Tem certeza que deseja excluir este toner?')) {
+                const formData = new FormData();
+                formData.append('action', 'delete_toner');
+                formData.append('id', id);
+
+                sgqFetch('toners_api.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showMessage(data.message, 'success');
+                        loadToners();
+                    } else {
+                        showMessage(data.message, 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    showMessage('Erro ao excluir toner', 'error');
+                });
+            }
+        }
+
         // Event listeners - criar toner
         document.getElementById('btn-save-toner')?.addEventListener('click', function() {
             const form = document.getElementById('create-form-toner');
@@ -410,6 +538,38 @@ try {
                 console.error('Erro:', error);
                 showMessage('Erro ao salvar toner', 'error');
             });
+        });
+
+        // Event listener - editar toner
+        document.getElementById('edit-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            formData.append('action', 'update_toner');
+
+            sgqFetch('toners_api.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                    closeEditModal();
+                    loadToners();
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                showMessage('Erro ao atualizar toner', 'error');
+            });
+        });
+
+        // Carregar toners ao inicializar a página
+        document.addEventListener('DOMContentLoaded', function() {
+            loadToners();
         });
 
         // Função para carregar toners

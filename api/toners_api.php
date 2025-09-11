@@ -10,12 +10,12 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 }
 
 require_once '../config/database.php';
-// Carrega o autoload do Composer apenas para ações que precisam (import/export)
-// Para evitar erro em ambientes sem vendor instalado, faremos include condicional mais abaixo
 
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\IOFactory;
+// Carrega PhpSpreadsheet apenas para ações que precisam
+$needsSpreadsheet = in_array($_REQUEST['action'] ?? '', ['download_template', 'import_excel', 'export_excel']);
+if ($needsSpreadsheet && file_exists('../vendor/autoload.php')) {
+    require_once '../vendor/autoload.php';
+}
 
 $db = Database::getInstance();
 $action = $_REQUEST['action'] ?? '';
@@ -168,8 +168,12 @@ try {
             break;
 
         case 'download_template':
+            if (!$needsSpreadsheet) {
+                echo json_encode(['success' => false, 'message' => 'PhpSpreadsheet não disponível']);
+                break;
+            }
             // Criar planilha template
-            $spreadsheet = new Spreadsheet();
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             
             // Cabeçalhos
@@ -236,7 +240,7 @@ try {
             header('Content-Disposition: attachment;filename="template_toners.xlsx"');
             header('Cache-Control: max-age=0');
             
-            $writer = new Xlsx($spreadsheet);
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
             $writer->save('php://output');
             exit;
 
@@ -249,7 +253,7 @@ try {
             $uploadedFile = $_FILES['excel_file']['tmp_name'];
             
             try {
-                $spreadsheet = IOFactory::load($uploadedFile);
+                $spreadsheet = \PhpOffice\PhpSpreadsheet\IOFactory::load($uploadedFile);
                 $sheet = $spreadsheet->getActiveSheet();
                 $highestRow = $sheet->getHighestRow();
                 
@@ -337,7 +341,7 @@ try {
                      FROM toners WHERE ativo = 1 ORDER BY modelo";
             $toners = $db->query($query);
             
-            $spreadsheet = new Spreadsheet();
+            $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             
             // Cabeçalhos
@@ -389,7 +393,7 @@ try {
             header('Content-Disposition: attachment;filename="toners_' . date('Y-m-d_H-i-s') . '.xlsx"');
             header('Cache-Control: max-age=0');
             
-            $writer = new Xlsx($spreadsheet);
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
             $writer->save('php://output');
             exit;
 
