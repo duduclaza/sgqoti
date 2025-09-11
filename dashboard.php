@@ -164,12 +164,8 @@ $menu_items = [
                         Sistema de Gestão da Qualidade - Todos os módulos estão em desenvolvimento
                     </p>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <a href="modules/toners/index.php" class="flex items-center px-4 py-3 text-gray-700 hover:bg-sap-gray hover:text-sap-blue transition-colors duration-200 rounded-lg mx-2">
-                            <span class="mr-3">🖨️</span>
-                            <span>Controle de Toners</span>
-                        </a>
-                        <?php foreach (array_slice($menu_items, 2) as $key => $item): ?>
-                            <a href="?page=<?php echo $key; ?>" 
+                        <?php foreach (array_slice($menu_items, 1) as $key => $item): ?>
+                            <a href="<?php echo isset($item['url']) ? $item['url'] : '?page=' . $key; ?>" 
                                class="p-4 border rounded-lg hover:bg-sap-light-blue hover:border-sap-blue transition-colors duration-200">
                                 <div class="text-2xl mb-2"><?php echo $item['icon']; ?></div>
                                 <div class="text-sm font-medium text-gray-700"><?php echo $item['title']; ?></div>
