@@ -232,9 +232,84 @@ CREATE INDEX idx_fornecedores_nome_ativo ON fornecedores(nome, ativo);
 -- Comentários nas tabelas
 -- =====================================================
 
+-- =====================================================
+-- Tabelas para Controle de Toners
+-- =====================================================
+
+-- Tabela para controle de toners
+CREATE TABLE IF NOT EXISTS toners (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    modelo VARCHAR(100) NOT NULL,
+    peso_cheio DECIMAL(8,3) NOT NULL COMMENT 'Peso em gramas',
+    peso_vazio DECIMAL(8,3) NOT NULL COMMENT 'Peso em gramas',
+    gramatura DECIMAL(8,3) GENERATED ALWAYS AS (peso_cheio - peso_vazio) STORED COMMENT 'Calculado automaticamente',
+    capacidade_folhas INT NOT NULL,
+    preco_toner DECIMAL(10,2) NOT NULL,
+    gramatura_por_folha DECIMAL(8,4) GENERATED ALWAYS AS (gramatura / capacidade_folhas) STORED COMMENT 'Calculado automaticamente',
+    custo_por_folha DECIMAL(8,4) GENERATED ALWAYS AS (preco_toner / capacidade_folhas) STORED COMMENT 'Calculado automaticamente',
+    cor ENUM('Yellow', 'Magenta', 'Cyan', 'Black') NOT NULL,
+    tipo ENUM('Original', 'Compativel', 'Remanufaturado') NOT NULL,
+    ativo BOOLEAN DEFAULT TRUE,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_atualizacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    usuario_cadastro INT DEFAULT 1,
+    FOREIGN KEY (usuario_cadastro) REFERENCES usuarios(id),
+    INDEX idx_modelo (modelo),
+    INDEX idx_cor (cor),
+    INDEX idx_tipo (tipo),
+    INDEX idx_ativo (ativo)
+);
+
+-- Inserir alguns toners de exemplo
+INSERT INTO toners (modelo, peso_cheio, peso_vazio, capacidade_folhas, preco_toner, cor, tipo) VALUES
+('HP CF410A', 850.5, 125.2, 2300, 89.90, 'Black', 'Original'),
+('HP CF411A', 820.3, 120.1, 2300, 95.50, 'Cyan', 'Original'),
+('HP CF412A', 815.7, 118.9, 2300, 95.50, 'Yellow', 'Original'),
+('HP CF413A', 818.2, 119.5, 2300, 95.50, 'Magenta', 'Original'),
+('Samsung MLT-D111S', 650.8, 95.3, 1000, 45.90, 'Black', 'Compativel'),
+('Canon 045H', 920.4, 140.2, 2200, 125.00, 'Black', 'Original');
+
+-- Tabela para registro de retornados
+CREATE TABLE IF NOT EXISTS toners_retornados (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    toner_id INT NOT NULL,
+    data_retorno DATE NOT NULL,
+    peso_retornado DECIMAL(8,3) NOT NULL COMMENT 'Peso em gramas',
+    percentual_uso DECIMAL(5,2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN (SELECT gramatura FROM toners WHERE id = toner_id) > 0 
+            THEN ((SELECT peso_cheio FROM toners WHERE id = toner_id) - peso_retornado) / (SELECT gramatura FROM toners WHERE id = toner_id) * 100
+            ELSE 0 
+        END
+    ) STORED COMMENT 'Calculado automaticamente',
+    folhas_utilizadas INT GENERATED ALWAYS AS (
+        CASE 
+            WHEN (SELECT gramatura_por_folha FROM toners WHERE id = toner_id) > 0 
+            THEN ROUND(((SELECT peso_cheio FROM toners WHERE id = toner_id) - peso_retornado) / (SELECT gramatura_por_folha FROM toners WHERE id = toner_id))
+            ELSE 0 
+        END
+    ) STORED COMMENT 'Calculado automaticamente',
+    custo_utilizado DECIMAL(10,2) GENERATED ALWAYS AS (
+        CASE 
+            WHEN (SELECT capacidade_folhas FROM toners WHERE id = toner_id) > 0 
+            THEN folhas_utilizadas * (SELECT custo_por_folha FROM toners WHERE id = toner_id)
+            ELSE 0 
+        END
+    ) STORED COMMENT 'Calculado automaticamente',
+    observacoes TEXT,
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    usuario_cadastro INT DEFAULT 1,
+    FOREIGN KEY (toner_id) REFERENCES toners(id) ON DELETE CASCADE,
+    FOREIGN KEY (usuario_cadastro) REFERENCES usuarios(id),
+    INDEX idx_data_retorno (data_retorno),
+    INDEX idx_toner_id (toner_id)
+);
+
 ALTER TABLE filiais COMMENT = 'Cadastro das filiais da empresa';
 ALTER TABLE departamentos COMMENT = 'Cadastro dos departamentos da empresa';
 ALTER TABLE fornecedores COMMENT = 'Cadastro de fornecedores com informações de contato e RMA';
 ALTER TABLE parametros_retornados COMMENT = 'Parâmetros para classificação de toners retornados baseado no percentual';
 ALTER TABLE usuarios COMMENT = 'Usuários do sistema com controle de acesso';
 ALTER TABLE logs_sistema COMMENT = 'Log de auditoria das ações realizadas no sistema';
+ALTER TABLE toners COMMENT = 'Cadastro de toners com cálculos automáticos de gramatura e custos';
+ALTER TABLE toners_retornados COMMENT = 'Registro de toners retornados com cálculos de uso e custos';
