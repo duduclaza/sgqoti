@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-200;
+  }
+  body {
+    @apply bg-gray-50 text-gray-900;
+  }
+}
+
+@layer components {
+  .sidebar-item {
+    @apply flex items-center px-4 py-3 text-gray-300 hover:bg-sidebar-hover hover:text-white transition-colors duration-200 cursor-pointer;
+  }
+  
+  .sidebar-item.active {
+    @apply bg-sidebar-active text-white border-r-2 border-primary-500;
+  }
+  
+  .sidebar-item svg {
+    @apply w-5 h-5 mr-3;
+  }
+}
