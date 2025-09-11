@@ -60,6 +60,92 @@ try {
                 <p class="text-sap-gray">Gerenciamento completo de toners e retornados</p>
             </div>
 
+    <!-- Modal de Novo Toner -->
+    <div id="create-modal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Cadastrar Novo Toner</h3>
+                </div>
+                <div class="px-6 py-4">
+                    <form id="create-form-toner" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
+                                <input type="text" name="modelo" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Cor</label>
+                                <select name="cor" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
+                                    <option value="">Selecione...</option>
+                                    <option value="Yellow">Yellow</option>
+                                    <option value="Magenta">Magenta</option>
+                                    <option value="Cyan">Cyan</option>
+                                    <option value="Black">Black</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Peso Cheio (g)</label>
+                                <input type="number" name="peso_cheio" step="0.001" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent" onchange="calcularGramatura()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Peso Vazio (g)</label>
+                                <input type="number" name="peso_vazio" step="0.001" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent" onchange="calcularGramatura()">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Gramatura (g)</label>
+                            <input type="number" name="gramatura" step="0.001" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600">
+                            <p class="text-xs text-gray-500 mt-1">Calculado automaticamente (Peso Cheio - Peso Vazio)</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Capacidade de Folhas</label>
+                                <input type="number" name="capacidade_folhas" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent" onchange="calcularCustos()">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Preço do Toner (R$)</label>
+                                <input type="number" name="preco_toner" step="0.01" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent" onchange="calcularCustos()">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Gramatura por Folha (g)</label>
+                                <input type="number" name="gramatura_por_folha" step="0.0001" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600">
+                                <p class="text-xs text-gray-500 mt-1">Calculado automaticamente (Gramatura ÷ Capacidade)</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Custo por Folha (R$)</label>
+                                <input type="number" name="custo_por_folha" step="0.0001" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600">
+                                <p class="text-xs text-gray-500 mt-1">Calculado automaticamente (Preço ÷ Capacidade)</p>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                            <select name="tipo" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
+                                <option value="">Selecione...</option>
+                                <option value="Original">Original</option>
+                                <option value="Compativel">Compatível</option>
+                                <option value="Remanufaturado">Remanufaturado</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+                    <button onclick="closeCreateModal()" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 transition duration-200">Cancelar</button>
+                    <button id="btn-save-toner" class="px-4 py-2 bg-sap-blue text-white rounded-md hover:bg-sap-light-blue transition duration-200">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
             <!-- Tabs -->
             <div class="border-b border-gray-200">
                 <nav class="flex space-x-8 px-6">
@@ -79,127 +165,38 @@ try {
                 <?php if ($activeTab === 'cadastro'): ?>
                     <!-- Cadastro de Toners -->
                     <div id="cadastro-tab">
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                            <!-- Formulário -->
-                            <div class="bg-gray-50 p-6 rounded-lg">
-                                <h3 class="text-lg font-semibold text-sap-blue mb-4">Cadastrar Novo Toner</h3>
-                                <form id="form-toner" class="space-y-4">
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo</label>
-                                            <input type="text" name="modelo" required 
-                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Cor</label>
-                                            <select name="cor" required 
-                                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
-                                                <option value="">Selecione...</option>
-                                                <option value="Yellow">Yellow</option>
-                                                <option value="Magenta">Magenta</option>
-                                                <option value="Cyan">Cyan</option>
-                                                <option value="Black">Black</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Peso Cheio (g)</label>
-                                            <input type="number" name="peso_cheio" step="0.001" required 
-                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent"
-                                                   onchange="calcularGramatura()">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Peso Vazio (g)</label>
-                                            <input type="number" name="peso_vazio" step="0.001" required 
-                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent"
-                                                   onchange="calcularGramatura()">
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Gramatura (g)</label>
-                                        <input type="number" name="gramatura" step="0.001" readonly 
-                                               class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600">
-                                        <p class="text-xs text-gray-500 mt-1">Calculado automaticamente (Peso Cheio - Peso Vazio)</p>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Capacidade de Folhas</label>
-                                            <input type="number" name="capacidade_folhas" required 
-                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent"
-                                                   onchange="calcularCustos()">
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Preço do Toner (R$)</label>
-                                            <input type="number" name="preco_toner" step="0.01" required 
-                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent"
-                                                   onchange="calcularCustos()">
-                                        </div>
-                                    </div>
-
-                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Gramatura por Folha (g)</label>
-                                            <input type="number" name="gramatura_por_folha" step="0.0001" readonly 
-                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600">
-                                            <p class="text-xs text-gray-500 mt-1">Calculado automaticamente (Gramatura ÷ Capacidade)</p>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 mb-1">Custo por Folha (R$)</label>
-                                            <input type="number" name="custo_por_folha" step="0.0001" readonly 
-                                                   class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-600">
-                                            <p class="text-xs text-gray-500 mt-1">Calculado automaticamente (Preço ÷ Capacidade)</p>
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                                        <select name="tipo" required 
-                                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-sap-blue focus:border-transparent">
-                                            <option value="">Selecione...</option>
-                                            <option value="Original">Original</option>
-                                            <option value="Compativel">Compatível</option>
-                                            <option value="Remanufaturado">Remanufaturado</option>
-                                        </select>
-                                    </div>
-
-                                    <button type="submit" 
-                                            class="w-full bg-sap-blue text-white py-2 px-4 rounded-md hover:bg-sap-light-blue transition duration-200">
-                                        Cadastrar Toner
-                                    </button>
-                                </form>
+                        <!-- Ações acima do grid -->
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-sap-blue">Toners Cadastrados</h3>
+                            <div class="space-x-2">
+                                <button onclick="openCreateModal()" 
+                                        class="bg-sap-blue text-white px-4 py-2 rounded-md hover:bg-sap-light-blue transition duration-200">
+                                    Novo Toner
+                                </button>
+                                <button onclick="openImportModal()" 
+                                        class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">
+                                    Importar Excel
+                                </button>
                             </div>
+                        </div>
 
-                            <!-- Lista/Grid -->
-                            <div>
-                                <div class="flex justify-between items-center mb-4">
-                                    <h3 class="text-lg font-semibold text-sap-blue">Toners Cadastrados</h3>
-                                    <button onclick="openImportModal()" 
-                                            class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200">
-                                        Importar Excel
-                                    </button>
-                                </div>
-                                <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                    <div class="max-h-96 overflow-y-auto">
-                                        <table class="min-w-full divide-y divide-gray-200">
-                                            <thead class="bg-gray-50 sticky top-0">
-                                                <tr>
-                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cor</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
-                                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="toners-list" class="bg-white divide-y divide-gray-200">
-                                                <!-- Dados carregados via JavaScript -->
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
+                        <!-- Grid -->
+                        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden">
+                            <div class="max-h-96 overflow-y-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50 sticky top-0">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Modelo</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cor</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Preço</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="toners-list" class="bg-white divide-y divide-gray-200">
+                                        <!-- Dados carregados via JavaScript -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -324,6 +321,14 @@ try {
             document.getElementById('edit-modal').classList.add('hidden');
         }
 
+        function openCreateModal() {
+            document.getElementById('create-modal').classList.remove('hidden');
+        }
+
+        function closeCreateModal() {
+            document.getElementById('create-modal').classList.add('hidden');
+        }
+
         function downloadTemplate() {
             window.location.href = '../../api/toners_api.php?action=download_template';
         }
@@ -380,13 +385,12 @@ try {
             }, 5000);
         }
 
-        // Event listeners
-        document.getElementById('form-toner')?.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(this);
+        // Event listeners - criar toner
+        document.getElementById('btn-save-toner')?.addEventListener('click', function() {
+            const form = document.getElementById('create-form-toner');
+            const formData = new FormData(form);
             formData.append('action', 'save_toner');
-            
+
             sgqFetch('toners_api.php', {
                 method: 'POST',
                 body: formData
@@ -395,7 +399,8 @@ try {
             .then(data => {
                 if (data.success) {
                     showMessage(data.message, 'success');
-                    this.reset();
+                    form.reset();
+                    closeCreateModal();
                     loadToners();
                 } else {
                     showMessage(data.message, 'error');

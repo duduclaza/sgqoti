@@ -2,15 +2,16 @@
 session_start();
 header('Content-Type: application/json');
 
-// Verificar se o usuário está logado
-if (!isset($_SESSION['usuario'])) {
+// Verificar se o usuário está logado (mesma chave usada no sistema)
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     http_response_code(401);
     echo json_encode(['success' => false, 'message' => 'Usuário não autenticado']);
     exit;
 }
 
 require_once '../config/database.php';
-require_once '../vendor/autoload.php';
+// Carrega o autoload do Composer apenas para ações que precisam (import/export)
+// Para evitar erro em ambientes sem vendor instalado, faremos include condicional mais abaixo
 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;

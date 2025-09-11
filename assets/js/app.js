@@ -76,7 +76,8 @@ function sgqFetch(endpoint, options = {}) {
     const defaultOptions = {
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
-        }
+        },
+        credentials: 'same-origin'
     };
 
     const mergedOptions = { ...defaultOptions, ...options };
