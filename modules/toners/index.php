@@ -390,9 +390,15 @@ try {
             sgqFetch('toners_api.php?action=get_toners')
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
+                console.log('Resposta da API:', data); // Debug
+                if (data.success && Array.isArray(data.data)) {
                     const tbody = document.getElementById('toners-list');
                     tbody.innerHTML = '';
+                    
+                    if (data.data.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-3 text-center text-gray-500">Nenhum toner cadastrado</td></tr>';
+                        return;
+                    }
                     
                     data.data.forEach(toner => {
                         const row = document.createElement('tr');
@@ -409,7 +415,8 @@ try {
                         tbody.appendChild(row);
                     });
                 } else {
-                    showMessage('Erro ao carregar toners: ' + data.message, 'error');
+                    console.error('Dados inválidos da API:', data);
+                    showMessage('Erro ao carregar toners: ' + (data.message || 'Dados inválidos'), 'error');
                 }
             })
             .catch(error => {
@@ -570,113 +577,6 @@ try {
         // Carregar toners ao inicializar a página
         document.addEventListener('DOMContentLoaded', function() {
             loadToners();
-        });
-
-        // Função para carregar toners
-        function loadToners() {
-            const container = document.getElementById('toners-list');
-            if (!container) return;
-            
-            sgqFetch('toners_api.php?action=get_toners')
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    container.innerHTML = '';
-                    
-                    if (data.data.length === 0) {
-                        container.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-500">Nenhum toner cadastrado</td></tr>';
-                        return;
-                    }
-                    
-                    data.data.forEach(toner => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="px-4 py-3 text-sm text-gray-900">${toner.modelo}</td>
-                            <td class="px-4 py-3 text-sm">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getCorColor(toner.cor)}">
-                                    ${toner.cor}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-900">${toner.tipo}</td>
-                            <td class="px-4 py-3 text-sm text-gray-900">R$ ${parseFloat(toner.preco_toner).toFixed(2)}</td>
-                            <td class="px-4 py-3 text-sm">
-                                <button onclick="editToner(${toner.id})" 
-                                        class="text-sap-blue hover:text-sap-light-blue mr-3">
-                                    ✏️ Editar
-                                </button>
-                                <button onclick="deleteToner(${toner.id})" 
-                                        class="text-red-600 hover:text-red-800">
-                                    🗑️ Excluir
-                                </button>
-                            </td>
-                        `;
-                        container.appendChild(tr);
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao carregar toners:', error);
-                showMessage('Erro ao carregar toners', 'error');
-            });
-        }
-
-        function getCorColor(cor) {
-            const colors = {
-                'Yellow': 'bg-yellow-100 text-yellow-800',
-                'Magenta': 'bg-pink-100 text-pink-800',
-                'Cyan': 'bg-blue-100 text-blue-800',
-                'Black': 'bg-gray-100 text-gray-800'
-            };
-            return colors[cor] || 'bg-gray-100 text-gray-800';
-        }
-
-        function editToner(id) {
-            // Implementar edição
-            showMessage('Funcionalidade de edição será implementada', 'info');
-        }
-
-        function deleteToner(id) {
-            if (confirm('Tem certeza que deseja excluir este toner?')) {
-                const formData = new FormData();
-                formData.append('action', 'delete_toner');
-                formData.append('id', id);
-                
-                sgqFetch('toners_api.php', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showMessage(data.message, 'success');
-                        loadToners();
-                    } else {
-                        showMessage(data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro:', error);
-                    showMessage('Erro ao excluir toner', 'error');
-                });
-            }
-        }
-
-        // Carregar dados ao carregar a página
-        document.addEventListener('DOMContentLoaded', function() {
-            loadToners();
-        });
-
-        // Fechar modal ao clicar fora dele
-        document.getElementById('import-modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeImportModal();
-            }
-        });
-
-        document.getElementById('edit-modal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeEditModal();
-            }
         });
     </script>
 </body>
