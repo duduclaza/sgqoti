@@ -22,10 +22,10 @@ if (!class_exists('Environment')) {
 }
 
 try {
-    $env = Environment::getInstance();
+    // Usar métodos estáticos da classe Environment (não há getInstance)
     $activeTab = $_GET['tab'] ?? 'cadastro';
 } catch (Exception $e) {
-    die('Erro ao instanciar Environment: ' . $e->getMessage());
+    die('Erro ao preparar ambiente: ' . $e->getMessage());
 }
 ?>
 <!DOCTYPE html>
@@ -35,7 +35,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Controle de Toners - SGQ OTI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="<?php echo $env->asset('js/app.js'); ?>"></script>
+    <script src="<?php echo Environment::asset('js/app.js'); ?>"></script>
     <script>
         tailwind.config = {
             theme: {
